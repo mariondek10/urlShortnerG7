@@ -1,6 +1,5 @@
 package es.unizar.urlshortener.core
 
-import org.springframework.core.io.ByteArrayResource
 
 /**
  * [ClickRepositoryService] is the port to the repository that provides persistence to [Clicks][Click].
@@ -33,8 +32,4 @@ interface ValidatorService {
  */
 interface HashService {
     fun hasUrl(url: String): String
-}
-
-interface QRService{
-    fun getQRCode(hash: String): ByteArrayResource
 }
