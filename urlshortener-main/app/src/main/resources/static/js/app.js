@@ -7,22 +7,27 @@ $(document).ready(
                 $.ajax({
                     type: "POST",
                     url: "/api/link",
-                    data: $(this).serialize(),
-                    success: async function (msg, status, request) {
+                    data: {
+                        url: $("#url").val(),
+                        qr_bool: isQRChecked
+                    },
+                    success: function (data, status, request) {
+                        console.log("APP.js data:", data)
 
-                        if(isQRChecked){
+                        if(data.properties.qr){
                             console.log("SIIIIIIIIIII SE HA PULSADO QR");
+                            console.log("QR DEVUELTO");
                             
                             $("#result").html(
                                 "<div class='alert alert-success lead'><a target='_blank' href='"
-                                + request.getResponseHeader('Location')
+                                + data.url
                                 + "'>"
-                                + request.getResponseHeader('Location')
+                                + data.url
                                 + "</a></div>"
                                 + "<div class='alert alert-success lead'><a target='_blank' href='"
-                                + request.getResponseHeader('Location') + "/qr"
+                                + data.properties.qr
                                 + "'>"
-                                + request.getResponseHeader('Location') + "/qr"
+                                + data.properties.qr
                                 + "</a></div>"
                                 );
                         }else{
@@ -30,9 +35,9 @@ $(document).ready(
 
                             $("#result").html(
                                 "<div class='alert alert-success lead'><a target='_blank' href='"
-                                + request.getResponseHeader('Location')
+                                + data.url
                                 + "'>"
-                                + request.getResponseHeader('Location')
+                                + data.url
                                 + "</a></div>");
                         }
                         
