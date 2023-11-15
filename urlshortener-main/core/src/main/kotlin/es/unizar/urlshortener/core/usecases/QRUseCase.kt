@@ -4,12 +4,9 @@ package es.unizar.urlshortener.core.usecases
 
 import es.unizar.urlshortener.core.*
 import org.springframework.core.io.ByteArrayResource
-
-import org.springframework.http.HttpHeaders.CONTENT_DISPOSITION
 import org.springframework.http.MediaType.IMAGE_PNG_VALUE
 import java.io.ByteArrayOutputStream
 import io.github.g0dkar.qrcode.QRCode
-import qrcode.QRCode
 
 
 /**
@@ -34,15 +31,12 @@ class QRUseCaseImpl(
     shortUrlRepository.findByKey(id)?.let { shortUrl ->
         if (shortUrl.properties.qr_bool == true) {
             qrMap.computeIfAbsent(id) {
-                val pngData = QRCode.ofSquares().build(id).render()
-                val  p = QRCode(id).render().writeImage(it)
-                //val qr = ByteArrayResource(pngData, IMAGE_PNG_VALUE)
-                //qrMap.put(id, qr)
-                
-                ByteArrayResource(, IMAGE_PNG_VALUE)
+                val image = ByteArrayOutputStream()
+                QRCode(id).render().writeImage(image)
 
+                qrMap.put(id, ByteArrayResource(image.toByteArray(), IMAGE_PNG_VALUE))
 
-                }
+            }
         } else {
             throw InvalidUrlException("QR")
         }
