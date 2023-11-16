@@ -4,4 +4,5 @@ plugins {
 
 dependencies {
         implementation("io.github.g0dkar:qrcode-kotlin-jvm:3.2.0")
+        //implementation("net.glxn.qrgen:android:2.0")
 }

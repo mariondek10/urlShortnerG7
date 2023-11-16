@@ -4,20 +4,22 @@ $(document).ready(
             function (event) {
                 event.preventDefault();
                 let isQRChecked = $("#QRcheckbox").prop("checked");
+                console.log("isQRChecked:", isQRChecked)
+                console.log("url:", $("#url").val())
                 $.ajax({
                     type: "POST",
                     url: "/api/link",
                     data: {
                         url: $("#url").val(),
-                        qr_bool: isQRChecked
+                        qrBool: isQRChecked
                     },
-                    success: function (data, status, request) {
-                        console.log("APP.js data:", data)
+                    success: async function (data, status, request) {
+                        console.log("APP.js data recibida:", data)
 
                         if(data.properties.qr){
                             console.log("SIIIIIIIIIII SE HA PULSADO QR");
-                            console.log("QR DEVUELTO");
-                            
+                            console.log("properties.qr", data.properties.qr)
+
                             $("#result").html(
                                 "<div class='alert alert-success lead'><a target='_blank' href='"
                                 + data.url

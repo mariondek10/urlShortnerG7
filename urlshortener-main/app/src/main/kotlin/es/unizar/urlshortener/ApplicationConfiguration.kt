@@ -47,8 +47,8 @@ class ApplicationConfiguration(
         CreateShortUrlUseCaseImpl(shortUrlRepositoryService(), validatorService(), hashService())
 
     @Bean
-    fun QRUseCase() = QRUseCaseImpl(shortUrlRepositoryService(), qrMap())
+    fun qrMap(): HashMap<String, ByteArray> = HashMap()
 
     @Bean
-    fun qrMap(): HashMap<String, ByteArray> = HashMap()
+    fun qRUseCase() = QRUseCaseImpl(shortUrlRepositoryService(), qrMap())
 }

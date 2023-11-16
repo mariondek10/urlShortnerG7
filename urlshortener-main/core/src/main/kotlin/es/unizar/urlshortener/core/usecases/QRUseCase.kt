@@ -3,8 +3,6 @@
 package es.unizar.urlshortener.core.usecases
 
 import es.unizar.urlshortener.core.*
-import org.springframework.core.io.ByteArrayResource
-import org.springframework.http.MediaType.IMAGE_PNG_VALUE
 import java.io.ByteArrayOutputStream
 import io.github.g0dkar.qrcode.QRCode
 
@@ -16,7 +14,8 @@ import io.github.g0dkar.qrcode.QRCode
  * **Note**: This is an example of functionality.
  */
 interface QRUseCase {
-    fun getQRUseCase(id: String): ByteArrayResource
+    fun generateQR(id: String, url: String)
+    fun getQRUseCase(id: String): ByteArray
 }
 
 /**
@@ -24,34 +23,53 @@ interface QRUseCase {
  */
 class QRUseCaseImpl(
     private val shortUrlRepository: ShortUrlRepositoryService,
-    private val qrMap: HashMap<String, ByteArrayResource>
+    private val qrMap: HashMap<String, ByteArray>
 ) : QRUseCase {
-    override fun getQRUseCase(id: String): ByteArrayResource =
+
+    override fun generateQR(id: String, url: String) {
+        shortUrlRepository.findByKey(id)?.let {
+            if (it.properties.qrBool == true) {
+                System.out.println("(QRUSECASE) CREANDO QR it.properties.qrBool:" + it.properties.qrBool)
+                val image = ByteArrayOutputStream()
+                QRCode(url).render(10).writeImage(image)
+                val byteArray = image.toByteArray()
+                qrMap.put(id, byteArray)
+            }
+        } ?: throw RedirectionNotFound(id)
+    }
+
+    override fun getQRUseCase(id: String): ByteArray =
+            //Code based on: https://github.com/g0dkar/qrcode-kotlin#spring-framework-andor-spring-boot
+            shortUrlRepository.findByKey(id)?.let { shortUrl ->
+                System.out.println("(QRUSECASE) shortUrl:" + shortUrl)
+                if (shortUrl.properties.qrBool == true) {
+                    qrMap.get(id)
+                } else {
+                    throw QRException("QR")
+                }
+            } ?: throw RedirectionNotFound(id)
+
+    /*
+    override fun getQRUseCase(id: String): ByteArray =
     //Code based on: https://github.com/g0dkar/qrcode-kotlin#spring-framework-andor-spring-boot
     shortUrlRepository.findByKey(id)?.let { shortUrl ->
-        if (shortUrl.properties.qr_bool == true) {
+        System.out.println("(QRUSECASE) shortUrl:" + shortUrl)
+        if (shortUrl.properties.qrBool == true) {
             qrMap.computeIfAbsent(id) {
+                System.out.println("(QRUSECASE) computeIfAbsent: NO LO HA ENCONTRADO")
                 val image = ByteArrayOutputStream()
                 QRCode(id).render().writeImage(image)
 
-                qrMap.put(id, ByteArrayResource(image.toByteArray(), IMAGE_PNG_VALUE))
+                val byteArray = image.toByteArray()
+                requireNotNull(byteArray) { "Byte array is null" }
+                qrMap.put(id, byteArray)
+                byteArray
+
+                //qrMap.put(id, image.toByteArray())
 
             }
         } else {
             throw InvalidUrlException("QR")
         }
-    } ?: throw RedirectionNotFound(id)
-
+    } ?: throw RedirectionNotFound(id)*/
 }
-
-/*
-override fun getQRUseCase(id: String): ByteArray =
-        shortUrlRepository.findByKey(id)?.let {
-            
-            if (it.properties.qr_bool == true) {
-                qrMap.get(id)
-            } else {
-                throw InvalidUrlException("QR")
-            }
-        } ?: throw RedirectionNotFound(id)
- */
