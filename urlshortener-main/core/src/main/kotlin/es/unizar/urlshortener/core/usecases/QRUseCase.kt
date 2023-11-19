@@ -31,7 +31,11 @@ class QRUseCaseImpl(
             if (it.properties.qrBool == true) {
                 System.out.println("(QRUSECASE) CREANDO QR it.properties.qrBool:" + it.properties.qrBool)
                 val image = ByteArrayOutputStream()
-                QRCode(url).render(10).writeImage(image)
+                System.out.println("(QRUSECASE) IMAGE CREADA")
+                var qr = QRCode(url).render(25)
+                System.out.println("(QRUSECASE) QRCode(url).render(10)")
+                qr.writeImage(image)
+                System.out.println("(QRUSECASE) qr.writeImage(image)")
                 val byteArray = image.toByteArray()
                 qrMap.put(id, byteArray)
             }
@@ -43,6 +47,7 @@ class QRUseCaseImpl(
             shortUrlRepository.findByKey(id)?.let { shortUrl ->
                 System.out.println("(QRUSECASE) shortUrl:" + shortUrl)
                 if (shortUrl.properties.qrBool == true) {
+                    System.out.println("(QRUSECASE) qrBool es true y el id es:" + id)
                     qrMap.get(id)
                 } else {
                     throw QRException("QR")
