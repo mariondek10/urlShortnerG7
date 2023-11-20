@@ -21,14 +21,14 @@ data class ShortUrl(
     val created: OffsetDateTime = OffsetDateTime.now(),
     val properties: ShortUrlProperties = ShortUrlProperties()
 )
-/*
+
 data class UrlPerso(
     val alias: String,
     val redirection: Redirection,
     val created: OffsetDateTime = OffsetDateTime.now(),
     val properties: UrlPersoproperties = UrlPersoproperties()
 )
-*/
+
 
 /**
  * A [Redirection] specifies the [target] and the [status code][mode] of a redirection.
@@ -61,7 +61,7 @@ data class ClickProperties(
     val country: String? = null
 )
 
-/*
+
 data class UrlPersoproperties(
     val ip: String? = null,
     val sponsor: String? = null,
@@ -69,4 +69,4 @@ data class UrlPersoproperties(
     val owner: String? = null,
     val country: String? = null
 )
-*/
+
