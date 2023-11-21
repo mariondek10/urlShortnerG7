@@ -1,5 +1,16 @@
 $(document).ready(
-    function () {
+    function checkInputAlias() {
+        var isInputaliasEmpty;
+        var inputAliasValue = $("#inputAlias").val();
+
+        if (inputAliasValue.trim() !== "") {
+            alert("InputAlias has a value: " + inputAliasValue);
+            isInputaliasEmpty = false;
+        } else {
+            alert("InputAlias is empty");
+            isInputaliasEmpty = true;
+        }
+
         $("#shortener").submit(
             function (event) {
                 event.preventDefault();
