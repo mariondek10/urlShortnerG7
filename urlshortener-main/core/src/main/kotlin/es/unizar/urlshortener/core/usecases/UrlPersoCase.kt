@@ -9,7 +9,7 @@ import es.unizar.urlshortener.core.*
  * **Note**: This is an example of functionality.
  */
 interface UrlPersoCase {
-    fun create(url: String, data: UrlPersoproperties): UrlPerso
+    fun create(url: String, data: UrlPersoproperties, alias: String?): UrlPerso
 }
 
 /**
@@ -20,9 +20,9 @@ class UrlPersoCaseImpl(
     private val validatorService: ValidatorService,
     private val hashService: HashService
 ) : UrlPersoCase {
-    override fun create(url: String, data: UrlPersoproperties): UrlPerso =
+    override fun create(url: String, data: UrlPersoproperties, alias: String?): UrlPerso =
         if (validatorService.isValid(url)) {
-            val id: String = hashService.hasUrl(url)
+            val id: String = alias ?: hashService.hasUrl(url)
             val up = UrlPerso(
                 alias = id,
                 redirection = Redirection(target = url),

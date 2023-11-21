@@ -23,7 +23,7 @@ data class ShortUrl(
 )
 
 data class UrlPerso(
-    val alias: String,
+    val alias: String?,
     val redirection: Redirection,
     val created: OffsetDateTime = OffsetDateTime.now(),
     val properties: UrlPersoproperties = UrlPersoproperties()
