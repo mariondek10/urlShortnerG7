@@ -17,8 +17,6 @@ $(document).ready(
                         console.log("APP.js data recibida:", data)
 
                         if(data.properties.qr){
-                            console.log("SIIIIIIIIIII SE HA PULSADO QR");
-                            console.log("properties.qr", data.properties.qr)
 
                             $("#result").html(
                                 "<div class='alert alert-success lead'><a target='_blank' href='"
@@ -33,7 +31,6 @@ $(document).ready(
                                 + "</a></div>"
                                 );
                         }else{
-                            console.log("NOOOOOOOOOOO SE HA PULSADO QR");
 
                             $("#result").html(
                                 "<div class='alert alert-success lead'><a target='_blank' href='"
@@ -44,9 +41,11 @@ $(document).ready(
                         }
                         
                     },
-                    error: function () {
+                    error: function (data) {
                         $("#result").html(
-                            "<div class='alert alert-danger lead'>ERROR</div>");
+                            "<div class='alert alert-danger lead'>"
+                            + data.responseJSON.message
+                            + "</div>");
                     }
                 });
             });
