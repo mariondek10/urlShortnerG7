@@ -4,7 +4,7 @@ class InvalidUrlException(url: String) : Exception("[$url] does not follow a sup
 
 class RedirectionNotFound(key: String) : Exception("[$key] is not known")
 
-class QRException(key: String) : Exception("[$key] does not exist")
+class QRNotAvailable(key: String) : Exception("[$key] QR is not available")
 
 class UrlToShortNotReachable(url: String) : Exception("[$url] is not reachable, it is not possible to short it")
 

@@ -29,13 +29,13 @@ class QRUseCaseImpl(
     override fun generateQR(id: String, url: String) {
         shortUrlRepository.findByKey(id)?.let {
             if (it.properties.qrBool == true) {
-                System.out.println("(QRUSECASE) CREANDO QR it.properties.qrBool:" + it.properties.qrBool)
+                //System.out.println("(QRUSECASE) CREANDO QR it.properties.qrBool:" + it.properties.qrBool)
                 val image = ByteArrayOutputStream()
-                System.out.println("(QRUSECASE) IMAGE CREADA")
+                //System.out.println("(QRUSECASE) IMAGE CREADA")
                 var qr = QRCode(url).render(25)
-                System.out.println("(QRUSECASE) QRCode(url).render(10)")
+                //System.out.println("(QRUSECASE) QRCode(url).render(10)")
                 qr.writeImage(image)
-                System.out.println("(QRUSECASE) qr.writeImage(image)")
+                //System.out.println("(QRUSECASE) qr.writeImage(image)")
                 val byteArray = image.toByteArray()
                 qrMap.put(id, byteArray)
             }
@@ -45,16 +45,26 @@ class QRUseCaseImpl(
     override fun getQRUseCase(id: String): ByteArray =
             //Code based on: https://github.com/g0dkar/qrcode-kotlin#spring-framework-andor-spring-boot
             shortUrlRepository.findByKey(id)?.let { shortUrl ->
-                System.out.println("(QRUSECASE) shortUrl:" + shortUrl)
+                //System.out.println("(QRUSECASE) shortUrl:" + shortUrl)
                 if (shortUrl.properties.qrBool == true) {
-                    System.out.println("(QRUSECASE) qrBool es true y el id es:" + id)
+                    //System.out.println("(QRUSECASE) qrBool es true y el id es:" + id)
                     qrMap.get(id)
                 } else {
-                    throw QRException("QR")
+                    throw QRNotAvailable(id)
                 }
             } ?: throw RedirectionNotFound(id)
 
     /*
+
+
+
+    when {
+            !validatorService.isValid(url) -> throw InvalidUrlException(url)
+            !isReachableUseCase.isReachable(url) -> throw UrlToShortNotReachable(url)
+            else -> {
+
+
+
     override fun getQRUseCase(id: String): ByteArray =
     //Code based on: https://github.com/g0dkar/qrcode-kotlin#spring-framework-andor-spring-boot
     shortUrlRepository.findByKey(id)?.let { shortUrl ->
