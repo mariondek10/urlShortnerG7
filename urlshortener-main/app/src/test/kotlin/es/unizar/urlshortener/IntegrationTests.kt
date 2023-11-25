@@ -122,7 +122,7 @@ class HttpRequestTest {
     }
 
     @Test
-    fun `if the key exists, qr will return an image`() {
+    fun `if the key exists, qr will return an image (OK)`() {
         shortUrlQR("http://example.com/")
         val response = callQR("http://localhost:$port/f684a3c4/qr")
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
@@ -130,16 +130,16 @@ class HttpRequestTest {
     }
 
     @Test
-    fun `if the key exists but doesn't exist qr, qr will return a bad request`() {
-        shortUrl("http://example.com/")
+    fun `if the key doesn't exist, qr will return a not found (404)`() {
         val response = callQR("http://localhost:$port/f684a3c4/qr")
-        assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
     }
 
     @Test
-    fun `if the key doesn't exist, qr will return a not found`() {
+    fun `if the key exists but doesn't exist qr, qr will return a forbidden (403)`() {
+        shortUrl("http://example.com/")
         val response = callQR("http://localhost:$port/f684a3c4/qr")
-        assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
     }
 
     private fun shortUrl(url: String): ResponseEntity<ShortUrlDataOut> {
