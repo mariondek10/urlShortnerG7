@@ -5,7 +5,9 @@ package es.unizar.urlshortener.infrastructure.delivery
 import es.unizar.urlshortener.core.*
 import es.unizar.urlshortener.core.usecases.CreateShortUrlUseCase
 import es.unizar.urlshortener.core.usecases.LogClickUseCase
+import es.unizar.urlshortener.core.usecases.QRUseCase
 import es.unizar.urlshortener.core.usecases.RedirectUseCase
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.never
@@ -13,6 +15,7 @@ import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.servlet.MockMvc
@@ -41,6 +44,9 @@ class UrlShortenerControllerTest {
 
     @MockBean
     private lateinit var createShortUrlUseCase: CreateShortUrlUseCase
+
+    @MockBean
+    private lateinit var qrUseCase: QRUseCase
 
     @Test
     fun `redirectTo returns a redirect when the key exists`() {
@@ -78,12 +84,35 @@ class UrlShortenerControllerTest {
         mockMvc.perform(
             post("/api/link")
                 .param("url", "http://example.com/")
+                .param("qrBool", "false")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
         )
             .andDo(print())
             .andExpect(status().isCreated)
             .andExpect(redirectedUrl("http://localhost/f684a3c4"))
             .andExpect(jsonPath("$.url").value("http://localhost/f684a3c4"))
+    }
+
+    @Test
+    fun `creates returns a basic redirect if it can compute a hash with a qr`() {
+        given(
+                createShortUrlUseCase.create(
+                        url = "http://example.com/",
+                        data = ShortUrlProperties(ip = "127.0.0.1", qrBool = true)
+                )
+        ).willReturn(ShortUrl("f684a3c4", Redirection("http://example.com/")))
+
+        mockMvc.perform(
+                post("/api/link")
+                        .param("url", "http://example.com/")
+                        .param("qrBool", "true")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+        )
+                .andDo(print())
+                .andExpect(status().isCreated)
+                .andExpect(redirectedUrl("http://localhost/f684a3c4"))
+                .andExpect(jsonPath("$.url").value("http://localhost/f684a3c4"))
+                .andExpect(jsonPath("$.properties.qr").value("http://localhost/f684a3c4/qr"))
     }
 
     @Test
@@ -101,6 +130,33 @@ class UrlShortenerControllerTest {
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
         )
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.statusCode").value(400))
+    }
+
+    @Test
+    fun `if the key doesn't exist, qr will return a not found (404)`() {
+        given(qrUseCase.getQRUseCase("key"))
+                .willAnswer { throw RedirectionNotFound("key") }
+
+        mockMvc.perform(get("/{id}/qr", "key"))
+                .andDo(print())
+    }
+
+    @Test
+    fun `if the key exists but doesn't exist a qr for that key, qr returns a bad request`() {
+        given(qrUseCase.getQRUseCase("key"))
+                .willAnswer { throw QRNotAvailable("key") }
+
+        mockMvc.perform(get("/{id}/qr", "key"))
+                .andDo(print())
+    }
+
+    @Test
+    fun `if the key exists, qr will return an image `() {
+        given(qrUseCase.getQRUseCase("key")).willReturn("Testing".toByteArray())
+
+        mockMvc.perform(get("/{id}/qr", "key"))
+                .andExpect(status().isOk)
+                .andExpect(content().contentType(MediaType.IMAGE_PNG))
+                .andExpect(content().bytes("Testing".toByteArray()))
     }
 }

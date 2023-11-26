@@ -41,7 +41,7 @@ $(document).ready(
                         }
                         
                     },
-                    error: function (data) {
+                    error: async function (data) {
                         $("#result").html(
                             "<div class='alert alert-danger lead'>"
                             + data.responseJSON.message
