@@ -16,11 +16,6 @@ interface ShortUrlRepositoryService {
     fun save(su: ShortUrl): ShortUrl
 }
 
-interface UrlPersoRepositoryService{
-    fun findByKey(id: String): UrlPerso?
-    fun save(up: UrlPerso): UrlPerso
-}
-
 
 /**
  * [ValidatorService] is the port to the service that validates if an url can be shortened.
