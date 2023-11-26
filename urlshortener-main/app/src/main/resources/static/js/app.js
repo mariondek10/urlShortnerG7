@@ -1,42 +1,58 @@
 $(document).ready(
     function () {
-        /*var isInputaliasEmpty;
-        var inputAliasValue = $("#inputAlias").val();
-
-        if (inputAliasValue.trim() !== "") {
-            alert("InputAlias has a value: " + inputAliasValue);
-            isInputaliasEmpty = false;
-        } else {
-            alert("InputAlias is empty");
-            isInputaliasEmpty = true;
-        }*/
 
         $("#shortener").submit(
             function (event) {
                 event.preventDefault();
+
                 let alias = document.getElementById('inputAlias').value;
                 console.log("alias:", alias)
+                            
+                let isQRChecked = $("#QRcheckbox").prop("checked");
+                console.log("isQRChecked:", isQRChecked)
+
                 console.log("url:", $("#url").val())
                 $.ajax({
                     type: "POST",
                     url: "/api/link",
                     data: {
                         url: $("#url").val(),
-                        alias: alias
+                        alias: alias,
+                        qrBool: isQRChecked
                     },
-                    success: async function (msg, status, request) {
-                        console.log(msg)
+                    success: async function (data, status, request) {
+                        console.log("APP.js data recibida:", data)
 
-                        $("#result").html(
-                            "<div class='alert alert-success lead'><a target='_blank' href='"
-                            + request.getResponseHeader('Location')
-                            + "'>"
-                            + request.getResponseHeader('Location')
-                            + "</a></div>");
+                        if(data.properties.qr){
+
+                            $("#result").html(
+                                "<div class='alert alert-success lead'><a target='_blank' href='"
+                                + data.url
+                                + "'>"
+                                + data.url
+                                + "</a></div>"
+                                + "<div class='alert alert-success lead'><a target='_blank' href='"
+                                + data.properties.qr
+                                + "'>"
+                                + data.properties.qr
+                                + "</a></div>"
+                                );
+                        }else{
+
+                            $("#result").html(
+                                "<div class='alert alert-success lead'><a target='_blank' href='"
+                                + data.url
+                                + "'>"
+                                + data.url
+                                + "</a></div>");
+                        }
+                        
                     },
-                    error: async function () {
+                    error: async function (data) {
                         $("#result").html(
-                            "<div class='alert alert-danger lead'>ERROR</div>");
+                            "<div class='alert alert-danger lead'>"
+                            + data.responseJSON.message
+                            + "</div>");
                     }
                 });
             });

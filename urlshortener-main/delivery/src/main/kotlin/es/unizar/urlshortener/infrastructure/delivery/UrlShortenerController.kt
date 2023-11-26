@@ -5,6 +5,7 @@ import es.unizar.urlshortener.core.ShortUrlProperties
 import es.unizar.urlshortener.core.usecases.CreateShortUrlUseCase
 import es.unizar.urlshortener.core.usecases.LogClickUseCase
 import es.unizar.urlshortener.core.usecases.RedirectUseCase
+import es.unizar.urlshortener.core.usecases.QRUseCase
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.hateoas.server.mvc.linkTo
 import org.springframework.http.HttpHeaders
@@ -15,7 +16,9 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.core.io.ByteArrayResource
 import java.net.URI
+import org.springframework.http.MediaType.IMAGE_PNG_VALUE
 
 /**
  * The specification of the controller.
@@ -35,6 +38,8 @@ interface UrlShortenerController {
      * **Note**: Delivery of use case [CreateShortUrlUseCase].
      */
     fun shortener(data: ShortUrlDataIn, request: HttpServletRequest): ResponseEntity<ShortUrlDataOut>
+
+    fun getQR(id: String, request: HttpServletRequest): ResponseEntity<ByteArrayResource>
 }
 
 /**
@@ -43,7 +48,9 @@ interface UrlShortenerController {
 data class ShortUrlDataIn(
     val url: String,
     val sponsor: String? = null,
-    val alias: String? = null
+    val alias: String? = null,
+    val qrBool: Boolean
+
 )
 
 /**
@@ -64,6 +71,8 @@ class UrlShortenerControllerImpl(
     val redirectUseCase: RedirectUseCase,
     val logClickUseCase: LogClickUseCase,
     val createShortUrlUseCase: CreateShortUrlUseCase,
+    val qrUseCase: QRUseCase, 
+
 ) : UrlShortenerController {
 
     @GetMapping("/{id:(?!api|index).*}")
@@ -82,19 +91,44 @@ class UrlShortenerControllerImpl(
             data = ShortUrlProperties(
                 ip = request.remoteAddr,
                 sponsor = data.sponsor,
-                alias = data.alias
+                alias = data.alias,
+                qrBool = data.qrBool
             )
         ).let {
-            //System.out.println("(UrlShortenerController) datos APP.js: ShortUrlDataIn:" + data)
+            System.out.println("(UrlShortenerController) datos APP.js: ShortUrlDataIn:" + data)
+            System.out.println("(UrlShortenerController) shortURL creada:" + it)
+
             val h = HttpHeaders()
             val url = linkTo<UrlShortenerControllerImpl> { redirectTo(it.hash, request) }.toUri()
             h.location = url
+
+            //val properties = mutableMapOf<String, Any>("safe" to it.properties.safe)
+            val properties = mutableMapOf<String, Any>()
+
+            if(data.qrBool){
+                System.out.println("(UrlShortenerController) LLAMANDO A  generateQR")
+                qrUseCase.generateQR(it.hash, url.toString())
+                System.out.println("(UrlShortenerController) LLAMANDO A getQR():" + url.toString())
+                val qrUrl = linkTo<UrlShortenerControllerImpl> { getQR(it.hash, request) }.toUri()
+                properties["qr"] = qrUrl
+            }
+
             val response = ShortUrlDataOut(
                 url = url,
-                properties = mapOf(
-                    "safe" to it.properties.safe
-                )
+                properties = properties
             )
+            System.out.println("(UrlShortenerController) response: ShortUrlDataOut:" + response)
+
             ResponseEntity<ShortUrlDataOut>(response, h, HttpStatus.CREATED)
         }
+
+    @GetMapping("/{id:(?!api|index).*}/qr")
+    override fun getQR(@PathVariable id: String, request: HttpServletRequest): ResponseEntity<ByteArrayResource> =
+        qrUseCase.getQRUseCase(id).let { qr ->
+            val h = HttpHeaders()
+            h.set(HttpHeaders.CONTENT_TYPE, IMAGE_PNG_VALUE)
+            System.out.println("(UrlShortenerController) qr del getQRUseCase:" + qr)
+            ResponseEntity<ByteArrayResource>(ByteArrayResource(qr, IMAGE_PNG_VALUE), h, HttpStatus.OK)
+        }
+
 }
