@@ -1,6 +1,6 @@
 $(document).ready(
-    function checkInputAlias() {
-        var isInputaliasEmpty;
+    function () {
+        /*var isInputaliasEmpty;
         var inputAliasValue = $("#inputAlias").val();
 
         if (inputAliasValue.trim() !== "") {
@@ -9,16 +9,24 @@ $(document).ready(
         } else {
             alert("InputAlias is empty");
             isInputaliasEmpty = true;
-        }
+        }*/
 
         $("#shortener").submit(
             function (event) {
                 event.preventDefault();
+                let alias = document.getElementById('inputAlias').value;
+                console.log("alias:", alias)
+                console.log("url:", $("#url").val())
                 $.ajax({
                     type: "POST",
                     url: "/api/link",
-                    data: $(this).serialize(),
-                    success: function (msg, status, request) {
+                    data: {
+                        url: $("#url").val(),
+                        alias: alias
+                    },
+                    success: async function (msg, status, request) {
+                        console.log(msg)
+
                         $("#result").html(
                             "<div class='alert alert-success lead'><a target='_blank' href='"
                             + request.getResponseHeader('Location')
@@ -26,7 +34,7 @@ $(document).ready(
                             + request.getResponseHeader('Location')
                             + "</a></div>");
                     },
-                    error: function () {
+                    error: async function () {
                         $("#result").html(
                             "<div class='alert alert-danger lead'>ERROR</div>");
                     }
