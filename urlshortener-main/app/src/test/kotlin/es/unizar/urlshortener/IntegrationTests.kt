@@ -136,7 +136,7 @@ class HttpRequestTest {
     }
 
     @Test
-    fun `if the key exists but doesn't exist qr, qr will return a forbidden (403)`() {
+    fun `if the key exists but is invalid, qr will return a forbidden (403)`() {
         shortUrl("http://example.com/")
         val response = callQR("http://localhost:$port/f684a3c4/qr")
         assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)

@@ -32,7 +32,7 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
     @ResponseBody
     @ExceptionHandler(value = [QRNotAvailable::class])
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    fun qrNotAvailable(ex: QRNotAvailable) = ErrorMessage(HttpStatus.FORBIDDEN.value(), ex.message)
+    fun qrNotAvailable(ex: QRNotAvailable) = ErrorMessage(HttpStatus.BAD_REQUEST.value(), ex.message)
 
     @ResponseBody
     @ExceptionHandler(value = [RedirectionNotFound::class])
