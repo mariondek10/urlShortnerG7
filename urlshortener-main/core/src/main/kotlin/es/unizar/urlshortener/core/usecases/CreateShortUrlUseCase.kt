@@ -30,7 +30,7 @@ class CreateShortUrlUseCaseImpl(
                 shortUrlRepository.findByKey(hashService.hasUrl(url))?.let { shortUrl ->
                     if (shortUrl.properties.qrBool == false && data.qrBool == true) {
                         //no esta el qr(false) y se requiere (true)
-                        val id: String = hashService.hasUrl(url)
+                        val id: String = data.alias ?: hashService.hasUrl(url)
                         val su = ShortUrl(
                             hash = id,
                             redirection = Redirection(target = url),
@@ -48,7 +48,7 @@ class CreateShortUrlUseCaseImpl(
                 }?: run{
                     if (validatorService.isValid(url)) {
                         System.out.println("(CreateShortUrlUseCase) data: ShortUrlProperties:" + data)
-                        val id: String = hashService.hasUrl(url)
+                        val id: String = data.alias ?: hashService.hasUrl(url)
                         val su = ShortUrl(
                             hash = id,
                             redirection = Redirection(target = url),
@@ -67,6 +67,7 @@ class CreateShortUrlUseCaseImpl(
                 }
 
             }
+
         }
 
 

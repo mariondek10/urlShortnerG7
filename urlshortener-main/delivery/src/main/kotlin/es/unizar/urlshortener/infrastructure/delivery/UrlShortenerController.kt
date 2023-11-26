@@ -48,7 +48,9 @@ interface UrlShortenerController {
 data class ShortUrlDataIn(
     val url: String,
     val sponsor: String? = null,
+    val alias: String? = null,
     val qrBool: Boolean
+
 )
 
 /**
@@ -69,7 +71,8 @@ class UrlShortenerControllerImpl(
     val redirectUseCase: RedirectUseCase,
     val logClickUseCase: LogClickUseCase,
     val createShortUrlUseCase: CreateShortUrlUseCase,
-    val qrUseCase: QRUseCase 
+    val qrUseCase: QRUseCase, 
+
 ) : UrlShortenerController {
 
     @GetMapping("/{id:(?!api|index).*}")
@@ -88,6 +91,7 @@ class UrlShortenerControllerImpl(
             data = ShortUrlProperties(
                 ip = request.remoteAddr,
                 sponsor = data.sponsor,
+                alias = data.alias,
                 qrBool = data.qrBool
             )
         ).let {

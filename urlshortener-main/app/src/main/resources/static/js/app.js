@@ -1,16 +1,23 @@
 $(document).ready(
     function () {
+
         $("#shortener").submit(
             function (event) {
                 event.preventDefault();
+
+                let alias = document.getElementById('inputAlias').value;
+                console.log("alias:", alias)
+                            
                 let isQRChecked = $("#QRcheckbox").prop("checked");
                 console.log("isQRChecked:", isQRChecked)
+
                 console.log("url:", $("#url").val())
                 $.ajax({
                     type: "POST",
                     url: "/api/link",
                     data: {
                         url: $("#url").val(),
+                        alias: alias,
                         qrBool: isQRChecked
                     },
                     success: async function (data, status, request) {
