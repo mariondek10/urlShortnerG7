@@ -16,10 +16,6 @@ interface ShortUrlRepositoryService {
     fun save(su: ShortUrl): ShortUrl
 }
 
-interface UrlPersoRepositoryService{
-    fun findByKey(id: String): UrlPerso?
-    fun save(up: UrlPerso): UrlPerso
-}
 
 
 /**
