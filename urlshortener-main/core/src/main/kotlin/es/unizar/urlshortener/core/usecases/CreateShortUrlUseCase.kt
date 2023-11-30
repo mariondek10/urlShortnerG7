@@ -27,8 +27,16 @@ class CreateShortUrlUseCaseImpl(
             !validatorService.isValid(url) -> throw InvalidUrlException(url)
             !isReachableUseCase.isReachable(url) -> throw UrlToShortNotReachable(url)
             else -> {
-                shortUrlRepository.findByKey(hashService.hasUrl(url))?.let { shortUrl ->
-                    if (shortUrl.properties.qrBool == false && data.qrBool == true) {
+
+                // RESOLVER LA ID, SI HASH O ALIAS
+                // CREAR SHORTURL
+                // SALVARLO CAPTURANDO ERROR SI HAY DUPLICATED KEY, SI ES CON ALIAS NO NULLO
+
+                // POST /api/link
+                // Crear una URL acortada que no existe previamente
+                shortUrlRepository.findByKey(hashService.hasUrl(url))
+                    ?.let { shortUrl -> // Existe una URL acortada asociada a la URL original
+                    if (shortUrl.properties.qrBool == false && data.qrBool == true) { //esta el qr(false) y se requiere (true)
                         //no esta el qr(false) y se requiere (true)
                         val id: String = data.alias ?: hashService.hasUrl(url)
                         val su = ShortUrl(
@@ -41,12 +49,12 @@ class CreateShortUrlUseCaseImpl(
                                 qrBool = data.qrBool,
                             )
                         )
-                        shortUrlRepository.save(su)
+                        shortUrlRepository.save(su)// duplicamos
                     } else {
-                        shortUrl
+                        shortUrl// lo que ya estaba en la base de datos
                     }
-                }?: run{
-                    if (validatorService.isValid(url)) {
+                }?: run{// No existe la URL
+                    if (validatorService.isValid(url)) { // PERO SI YA LO HE COMPROBADO, LUEGO ES TRUE
                         System.out.println("(CreateShortUrlUseCase) data: ShortUrlProperties:" + data)
                         val id: String = data.alias ?: hashService.hasUrl(url)
                         val su = ShortUrl(
@@ -60,7 +68,7 @@ class CreateShortUrlUseCaseImpl(
                             )
                         )
                         System.out.println("(CreateShortUrlUseCase) antes de save su: ShortUrl:" + su)
-                        shortUrlRepository.save(su)
+                        shortUrlRepository.save(su)// CREO LA URL QUE NO EXISTIA EN LA BASE DE DATOS
                     } else {
                         throw InvalidUrlException(url)
                     }
