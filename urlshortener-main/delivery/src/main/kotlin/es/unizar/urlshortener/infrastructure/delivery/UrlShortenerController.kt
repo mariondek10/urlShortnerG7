@@ -3,6 +3,7 @@ package es.unizar.urlshortener.infrastructure.delivery
 import es.unizar.urlshortener.core.ClickProperties
 import es.unizar.urlshortener.core.ShortUrlProperties
 import es.unizar.urlshortener.core.usecases.CreateShortUrlUseCase
+import es.unizar.urlshortener.core.usecases.*
 import es.unizar.urlshortener.core.usecases.LogClickUseCase
 import es.unizar.urlshortener.core.usecases.RedirectUseCase
 import jakarta.servlet.http.HttpServletRequest
@@ -35,6 +36,13 @@ interface UrlShortenerController {
      * **Note**: Delivery of use case [CreateShortUrlUseCase].
      */
     fun shortener(data: ShortUrlDataIn, request: HttpServletRequest): ResponseEntity<ShortUrlDataOut>
+
+    /**
+     * Converts CSV data provided in [data].
+     *
+     * **Note**: Delivery of use case [CsvUseCase].
+     */
+    fun csvHandler(data: CsvDataIn, request: HttpServletRequest): ResponseEntity<CsvDataOut>
 }
 
 /**
@@ -54,6 +62,21 @@ data class ShortUrlDataOut(
 )
 
 /**
+ * Data required to process CSV data.
+ */
+ data class CsvDataIn(
+    val csv: String,
+    val selector: String
+ )
+
+/**
+ * Data returned after the processing of a CSV file.
+ */
+data class CsvDataOut(
+    val csv: String
+)
+
+/**
  * The implementation of the controller.
  *
  * **Note**: Spring Boot is able to discover this [RestController] without further configuration.
@@ -62,7 +85,8 @@ data class ShortUrlDataOut(
 class UrlShortenerControllerImpl(
     val redirectUseCase: RedirectUseCase,
     val logClickUseCase: LogClickUseCase,
-    val createShortUrlUseCase: CreateShortUrlUseCase
+    val createShortUrlUseCase: CreateShortUrlUseCase,
+    val csvUseCase: CsvUseCase
 ) : UrlShortenerController {
 
     @GetMapping("/{id:(?!api|index).*}")
@@ -93,5 +117,14 @@ class UrlShortenerControllerImpl(
                 )
             )
             ResponseEntity<ShortUrlDataOut>(response, h, HttpStatus.CREATED)
+        }
+
+    @PostMapping("/api/bulk", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE]) 
+    override fun csvHandler(data: CsvDataIn, request: HttpServletRequest): ResponseEntity<CsvDataOut> =
+        csvUseCase.convert(data.csv, data.selector).let { processedData ->
+            val response = CsvDataOut(
+                csv = processedData
+            )
+            ResponseEntity<CsvDataOut>(response, HttpStatus.OK)
         }
 }

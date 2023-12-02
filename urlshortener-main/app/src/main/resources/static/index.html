@@ -79,46 +79,79 @@
         const processButton = document.getElementById('processButton');
         const downloadLink = document.getElementById('downloadLink');
         const outputElement = document.getElementById('output');
+        petitionData = new FormData();
         var sel = 1;
+        var variableValue = 1;
 
         processButton.addEventListener('click', () => {
+
+
             const file = csvFileInput.files[0];
             if (file) { // Ensures there's an actual filed uploaded
                 const reader = new FileReader();
 
+                // We secure the values
                 reader.onload = (event) => {
-                const csv = event.target.result;
-
+                csv = event.target.result;
+                console.log("Csv value: " + csv);
                 getValue();
 
-                /*// Attempts to send the CSV data to the server, not finished 
-                let serverResponse
+                 // Obtenemos los datos del formulario y los adicionales
+                 var dataCsv = $(this).serialize() + "&csv=" + encodeURIComponent(csv) + "&selector=" + encodeURIComponent(variableValue);
+                console.log("Serialized data: " + dataCsv);
 
-                $.ajax({
+                 $.ajax({
                     type: "POST",
-                    url: "/api/link",
-                    data: {
-                        csvData: csv,
-                        selector: sel
+                    url: "/api/bulk",
+                    data: dataCsv,
+                    success: function (msg, status, request) {
+                        csv = msg.csv;
+                        console.log("Message: " + msg);
+
+                        console.log("Csv: " + csv);
+
+                        const blolb = new Blob([csv], {type: 'text/csv'}); // The data will be downloaded as a CSV file
+                        downloadLink.href = URL.createObjectURL(blolb);
+                        downloadLink.style.display = 'block';
                     },
-                    success: function (response) {
-                        serverResponse = response;
-                        
-                    },
-                    error: function () {
-                        outputElement.innerHTML = "<div class='alert alert-danger lead'>ERROR</div>";
-                        outputElement.style.display = 'block';
+                    error: function (request, status, error) {
+                        // Aquí se maneja el error de la petición
+                        console.error('Error:', error);
                     }
                 });
+                
+                //const formData = new FormData();
+                //formData.append('csv', csv);
+                //formData.append('mode', variableValue);
+
+                /*
+                fetch("/api/bulk", {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                    throw new Error(`HTTP error Status: ${response.status}`);
+                    console.log("Error: " + response);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    csv = data;
+                    console.log(csv);
+
+                    const blolb = new Blob([csv], {type: 'text/csv'}); // The data will be downloaded as a CSV file
+                    downloadLink.href = URL.createObjectURL(blolb);
+                    downloadLink.style.display = 'block';
+                })
+                .catch(error => {
+                    // Handle errors
+                    console.error("Fetch error:", error);
+                });
                 */
-
-                // We print the CSV to the console
-                console.log(csv);
-
-                const blolb = new Blob([csv], {type: 'text/csv'}); // The data will be downloaded as a CSV file
-                downloadLink.href = URL.createObjectURL(blolb);
-                downloadLink.style.display = 'block';
-
                 
             };
 
