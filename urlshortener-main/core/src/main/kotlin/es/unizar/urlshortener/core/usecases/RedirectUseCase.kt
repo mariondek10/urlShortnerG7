@@ -22,6 +22,7 @@ class RedirectUseCaseImpl(
     private val shortUrlRepository: ShortUrlRepositoryService,
     private val isReachableUseCase: IsReachableUseCase
 ) : RedirectUseCase {
+
     override fun redirectTo(key: String) = shortUrlRepository
         .findByKey(key)
         ?.let {
