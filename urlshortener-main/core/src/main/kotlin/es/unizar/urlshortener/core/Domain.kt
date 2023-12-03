@@ -22,6 +22,7 @@ data class ShortUrl(
     val properties: ShortUrlProperties = ShortUrlProperties()
 )
 
+
 /**
  * A [Redirection] specifies the [target] and the [status code][mode] of a redirection.
  * By default, the [status code][mode] is 307 TEMPORARY REDIRECT.
@@ -39,7 +40,9 @@ data class ShortUrlProperties(
     val sponsor: String? = null,
     val safe: Boolean = true,
     val owner: String? = null,
-    val country: String? = null
+    val country: String? = null,
+    val alias: String? = null,
+    val qrBool: Boolean? = false
 )
 
 /**
@@ -52,3 +55,4 @@ data class ClickProperties(
     val platform: String? = null,
     val country: String? = null
 )
+
