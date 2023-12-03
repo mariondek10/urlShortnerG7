@@ -3,11 +3,7 @@
 package es.unizar.urlshortener.infrastructure.delivery
 
 import es.unizar.urlshortener.core.*
-import es.unizar.urlshortener.core.usecases.CreateShortUrlUseCase
-import es.unizar.urlshortener.core.usecases.LogClickUseCase
-import es.unizar.urlshortener.core.usecases.QRUseCase
-import es.unizar.urlshortener.core.usecases.RedirectUseCase
-import org.assertj.core.api.Assertions
+import es.unizar.urlshortener.core.usecases.*
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.never
@@ -15,7 +11,6 @@ import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.servlet.MockMvc
@@ -47,6 +42,9 @@ class UrlShortenerControllerTest {
 
     @MockBean
     private lateinit var qrUseCase: QRUseCase
+
+    @MockBean
+    private lateinit var isReachableUseCase: IsReachableUseCase
 
     @Test
     fun `redirectTo returns a redirect when the key exists`() {
@@ -113,6 +111,40 @@ class UrlShortenerControllerTest {
                 .andExpect(redirectedUrl("http://localhost/f684a3c4"))
                 .andExpect(jsonPath("$.url").value("http://localhost/f684a3c4"))
                 .andExpect(jsonPath("$.properties.qr").value("http://localhost/f684a3c4/qr"))
+    }
+
+    @Test
+    fun `Create returns a 400 response if the uri to shorten is not reachable`(){
+        val urlToShorten = "http://url-unreachable.com"
+        given(isReachableUseCase.isReachable(urlToShorten)).willReturn(false)
+        given(
+            createShortUrlUseCase.create(
+                url = urlToShorten,
+                data = ShortUrlProperties(ip = "127.0.0.1")
+            )
+        ).willAnswer { throw UrlToShortNotReachable(urlToShorten) }
+
+        mockMvc.perform(
+            post("/api/link")
+                .param("url",urlToShorten)
+                .contentType((MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+        ).andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `Redirect to returns a 403 response if the id is registered but the uri is not reachable`(){
+        val urlToRedirect = "https://url-unreachable.com/"
+        val id = "existing-hash"
+
+        given(isReachableUseCase.isReachable(urlToRedirect)).willReturn(false)
+        given(redirectUseCase.redirectTo(id))
+            .willAnswer { throw UrlRegisteredButNotReachable(id) }
+
+
+        mockMvc.perform(
+            get("/{id}", id)
+        )
+            .andExpect(status().isForbidden)
     }
 
     @Test
