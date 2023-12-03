@@ -67,8 +67,10 @@
         <label for="selector">Choose a value:</label>
         <select id="selector">
             <option value="a">Url shortener</option>
-            <option value="b">Qr generator</option>
-            <option value="c">Custom word</option>
+            <option value="b">Shortener + Qr generator</option>
+            <option value="c">Shortener + Custom word</option>
+            <option value="d">All options</option>
+
         </select>
         <button id="processButton">Process</button>
         <a id="downloadLink" style="display: none;" download="modified.csv">Download Modified CSV</a>
@@ -174,6 +176,9 @@
                     break;
                 case "c":
                     variableValue = 3;
+                    break;
+                case "d":
+                    variableValue = 4;
                     break;
                 default:
                     variableValue = 1; // Default value if none of the cases match

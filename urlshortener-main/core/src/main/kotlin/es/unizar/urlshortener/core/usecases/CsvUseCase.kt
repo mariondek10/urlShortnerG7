@@ -1,7 +1,6 @@
 @file:Suppress("WildcardImport")
 
 package es.unizar.urlshortener.core.usecases
-
 import es.unizar.urlshortener.core.*
 import java.io.BufferedReader
 import java.io.DataOutputStream
@@ -54,12 +53,12 @@ class CsvUseCaseImpl(
     override fun convert(csvData: String, selector:String): String {
         // We convert selector to int
         val selector = selector.toInt()
-        File("output.txt").writeText(csvData)
         val rows = csvData.split("\n")
+        var newCell = ""
         //println("Rows: " + rows)
-        val modifiedData = rows.joinToString("\n") { row ->
+        val modifiedData = rows.joinToString("") { row ->
             //println("Row: " + row)
-            row.split(";").joinToString(";") { cell ->
+            row.split(";").joinToString("") { cell ->
                 if (cell.isBlank()) {
                     ""
                 } else {
@@ -67,7 +66,8 @@ class CsvUseCaseImpl(
                         1 -> {
                             print("Shorten ")
                             try {      
-                                shortenUri(cell)
+                                newCell = shortenUri(cell)
+                                "$cell;$newCell;\n"
                             } catch (e: MalformedURLException) {
                                 // Handle invalid URL
                                 println("Invalid URL: " + e)
