@@ -71,14 +71,6 @@
     <div class="col-lg-12 text-center">
         <h1>Bulk url conversion</h1>
         <input type="file" id="csvFile" accept=".csv" class="center-block">
-        <label for="selector">Choose a value:</label>
-        <select id="selector">
-            <option value="a">Url shortener</option>
-            <option value="b">Shortener + Qr generator</option>
-            <option value="c">Shortener + Custom word</option>
-            <option value="d">All options</option>
-
-        </select>
         <button id="processButton">Process</button>
         <a id="downloadLink" style="display: none;" download="modified.csv">Download Modified CSV</a>
         <table id="output" style="display: none;"></table>
@@ -103,7 +95,6 @@
                 reader.onload = (event) => {
                 csv = event.target.result;
                 console.log("Csv value: " + csv);
-                getValue();
 
                  // Obtenemos los datos del formulario y los adicionales
                  var dataCsv = $(this).serialize() + "&csv=" + encodeURIComponent(csv) + "&selector=" + encodeURIComponent(variableValue);
@@ -129,38 +120,6 @@
                     }
                 });
                 
-                //const formData = new FormData();
-                //formData.append('csv', csv);
-                //formData.append('mode', variableValue);
-
-                /*
-                fetch("/api/bulk", {
-                    method: "POST",
-                    body: formData,
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                    throw new Error(`HTTP error Status: ${response.status}`);
-                    console.log("Error: " + response);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    csv = data;
-                    console.log(csv);
-
-                    const blolb = new Blob([csv], {type: 'text/csv'}); // The data will be downloaded as a CSV file
-                    downloadLink.href = URL.createObjectURL(blolb);
-                    downloadLink.style.display = 'block';
-                })
-                .catch(error => {
-                    // Handle errors
-                    console.error("Fetch error:", error);
-                });
-                */
                 
             };
 
@@ -168,32 +127,6 @@
             }
         });
 
-        function getValue() {
-            // Get the selected value from the dropdown
-            var selectedValue = document.getElementById("selector").value;
-
-            // Use a switch statement to assign a corresponding variable
-            
-            switch (selectedValue) {
-                case "a":
-                    variableValue = 1;
-                    break;
-                case "b":
-                    variableValue = 2;
-                    break;
-                case "c":
-                    variableValue = 3;
-                    break;
-                case "d":
-                    variableValue = 4;
-                    break;
-                default:
-                    variableValue = 1; // Default value if none of the cases match
-            }
-
-            // Use the variableValue as needed
-            console.log("Selected Value: " + variableValue);
-        }
         
     </script>
 </body>

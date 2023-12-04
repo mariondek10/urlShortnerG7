@@ -149,7 +149,7 @@ class UrlShortenerControllerImpl(
 
     @PostMapping("/api/bulk", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE]) 
     override fun csvHandler(data: CsvDataIn, request: HttpServletRequest): ResponseEntity<CsvDataOut> =
-        csvUseCase.convert(data.csv, data.selector).let { processedData ->
+        csvUseCase.convert(data.csv).let { processedData ->
             val response = CsvDataOut(
                 csv = processedData
             )
