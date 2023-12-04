@@ -1,4 +1,5 @@
 # Spring Datasource
+
 spring:
   datasource:
     url: jdbc:hsqldb:mem:.
@@ -7,3 +8,12 @@ spring:
     driverClassName: org.hsqldb.jdbc.JDBCDriver
   jpa:
     open-in-view: false
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*" #Se exponen todos los servicios por defecto. Cuando se sepan cuales de ellos se expondran finalmente habrá que
+                    # cambiar la configuracion y exponer solamente esos.
+
+
+

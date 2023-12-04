@@ -2,10 +2,7 @@ package es.unizar.urlshortener.infrastructure.delivery
 
 import es.unizar.urlshortener.core.ClickProperties
 import es.unizar.urlshortener.core.ShortUrlProperties
-import es.unizar.urlshortener.core.usecases.CreateShortUrlUseCase
-import es.unizar.urlshortener.core.usecases.LogClickUseCase
-import es.unizar.urlshortener.core.usecases.RedirectUseCase
-import es.unizar.urlshortener.core.usecases.QRUseCase
+import es.unizar.urlshortener.core.usecases.*
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.hateoas.server.mvc.linkTo
 import org.springframework.http.HttpHeaders
@@ -40,6 +37,10 @@ interface UrlShortenerController {
     fun shortener(data: ShortUrlDataIn, request: HttpServletRequest): ResponseEntity<ShortUrlDataOut>
 
     fun getQR(id: String, request: HttpServletRequest): ResponseEntity<ByteArrayResource>
+
+    fun getMetrics(request: HttpServletRequest): ResponseEntity<Any>
+
+    fun getMetricsById(id: String, request: HttpServletRequest): ResponseEntity<Any>
 }
 
 /**
@@ -71,7 +72,8 @@ class UrlShortenerControllerImpl(
     val redirectUseCase: RedirectUseCase,
     val logClickUseCase: LogClickUseCase,
     val createShortUrlUseCase: CreateShortUrlUseCase,
-    val qrUseCase: QRUseCase, 
+    val qrUseCase: QRUseCase,
+    val getMetricsUseCase: GetMetricsUseCase
 
 ) : UrlShortenerController {
 
@@ -95,8 +97,6 @@ class UrlShortenerControllerImpl(
                 qrBool = data.qrBool
             )
         ).let {
-            System.out.println("(UrlShortenerController) datos APP.js: ShortUrlDataIn:" + data)
-            System.out.println("(UrlShortenerController) shortURL creada:" + it)
 
             val h = HttpHeaders()
             val url = linkTo<UrlShortenerControllerImpl> { redirectTo(it.hash, request) }.toUri()
@@ -106,9 +106,7 @@ class UrlShortenerControllerImpl(
             val properties = mutableMapOf<String, Any>()
 
             if(data.qrBool){
-                System.out.println("(UrlShortenerController) LLAMANDO A  generateQR")
                 qrUseCase.generateQR(it.hash, url.toString())
-                System.out.println("(UrlShortenerController) LLAMANDO A getQR():" + url.toString())
                 val qrUrl = linkTo<UrlShortenerControllerImpl> { getQR(it.hash, request) }.toUri()
                 properties["qr"] = qrUrl
             }
@@ -117,8 +115,6 @@ class UrlShortenerControllerImpl(
                 url = url,
                 properties = properties
             )
-            System.out.println("(UrlShortenerController) response: ShortUrlDataOut:" + response)
-
             ResponseEntity<ShortUrlDataOut>(response, h, HttpStatus.CREATED)
         }
 
@@ -131,4 +127,13 @@ class UrlShortenerControllerImpl(
             ResponseEntity<ByteArrayResource>(ByteArrayResource(qr, IMAGE_PNG_VALUE), h, HttpStatus.OK)
         }
 
+    @GetMapping("/api/stats/metrics")
+    override fun getMetrics(request: HttpServletRequest): ResponseEntity<Any> {
+       return ResponseEntity(getMetricsUseCase.getAvailableMetrics(), HttpStatus.OK)
+    }
+
+    @GetMapping("/api/stats/metrics/{id}")
+    override fun getMetricsById(@PathVariable id: String, request: HttpServletRequest): ResponseEntity<Any> {
+        return ResponseEntity(getMetricsUseCase.getMetricById(id), HttpStatus.OK)
+    }
 }
