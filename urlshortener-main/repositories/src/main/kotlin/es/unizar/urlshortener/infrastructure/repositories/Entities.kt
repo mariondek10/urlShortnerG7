@@ -13,8 +13,6 @@ import java.time.OffsetDateTime
 @Suppress("LongParameterList")
 class ClickEntity(
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: Long?,
     val hash: String,
     val created: OffsetDateTime,
     val ip: String?,
@@ -31,8 +29,11 @@ class ClickEntity(
 @Table(name = "shorturl")
 @Suppress("LongParameterList")
 class ShortUrlEntity(
-    @Id
+    @Column(unique=true)
     val hash: String,
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    val id: Long?,
     val target: String,
     val sponsor: String?,
     val created: OffsetDateTime,
