@@ -100,7 +100,7 @@ class UrlShortenerControllerImpl(
 
 ) : UrlShortenerController {
 
-    @GetMapping("/{id:(?!api|index).*}")
+    @GetMapping("/{id:(?!api|index).*[^/]}")
     override fun redirectTo(@PathVariable id: String, request: HttpServletRequest): ResponseEntity<Unit> =
         redirectUseCase.redirectTo(id).let {
             logClickUseCase.logClick(id, ClickProperties(ip = request.remoteAddr))
