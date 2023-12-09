@@ -12,8 +12,9 @@ private const val CORE_POOL_SIZE = 5
 private const val QUEUE_CAPACITY = 100
 
 /**
- * Configuration used by concurrent processes that has the anotation @Async with the content concurrentConfig
+ * Configuration used by concurrent processes that has the anotation @Async with the content configQueue
  * */
+//Idea de código extraido de: https://medium.com/@databackendtech/spring-boot-java-framework-how-to-use-queue-between-threads-in-a-service-a1cfd6b78713
 @Configuration
 @EnableAsync
 @EnableScheduling
