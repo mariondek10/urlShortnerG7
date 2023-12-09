@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import java.util.concurrent.BlockingQueue
 
 @WebMvcTest
 @ContextConfiguration(
@@ -54,6 +55,9 @@ class UrlShortenerControllerTest {
 
     @MockBean
     private lateinit var isReachableUseCase: IsReachableUseCase
+
+    @MockBean
+    private lateinit var qrQueue: BlockingQueue<Pair<String, String>>
 
     @Test
     fun `redirectTo returns a redirect when the key exists`() {

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.core.io.ByteArrayResource
 import java.net.URI
 import org.springframework.http.MediaType.IMAGE_PNG_VALUE
+import java.util.concurrent.BlockingQueue
 
 /**
  * The specification of the controller.
@@ -96,7 +97,8 @@ class UrlShortenerControllerImpl(
     val logClickUseCase: LogClickUseCase,
     val createShortUrlUseCase: CreateShortUrlUseCase,
     val csvUseCase: CsvUseCase,
-    val qrUseCase: QRUseCase, 
+    val qrUseCase: QRUseCase,
+    val qrQueue: BlockingQueue<Pair<String, String>>
 
 ) : UrlShortenerController {
 
@@ -132,7 +134,7 @@ class UrlShortenerControllerImpl(
 
             if(data.qrBool){
                 System.out.println("(UrlShortenerController) LLAMANDO A  generateQR")
-                qrUseCase.generateQR(it.hash, url.toString())
+                qrQueue.put(Pair(it.hash, url.toString()))
                 System.out.println("(UrlShortenerController) LLAMANDO A getQR():" + url.toString())
                 val qrUrl = linkTo<UrlShortenerControllerImpl> { getQR(it.hash, request) }.toUri()
                 properties["qr"] = qrUrl
