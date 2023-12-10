@@ -41,5 +41,7 @@ class ShortUrlEntity(
     val safe: Boolean,
     val ip: String?,
     val country: String?,
-    val qrBool: Boolean?
+    val qrBool: Boolean?,
+    var qrReady : Boolean?,
+    val idColision : Int
 )

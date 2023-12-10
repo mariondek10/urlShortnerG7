@@ -1,4 +1,4 @@
-@file:Suppress("WildcardImport")
+//@file:Suppress("WildcardImport")
 
 package es.unizar.urlshortener.core.usecases
 
@@ -38,10 +38,7 @@ class QRUseCaseImpl(
                 //System.out.println("(QRUSECASE) qr.writeImage(image)")
                 val byteArray = image.toByteArray()
                 qrMap.put(id, byteArray)
-                val data = true
                 shortUrl.properties.qrReady = true
-            } else{
-                //ya esta generado y no hay que hacer nada
             }
         } ?: throw RedirectionNotFound(id)
     }

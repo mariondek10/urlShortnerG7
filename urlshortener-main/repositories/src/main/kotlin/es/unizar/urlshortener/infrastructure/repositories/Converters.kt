@@ -43,6 +43,7 @@ fun ShortUrlEntity.toDomain() = ShortUrl(
         mode = mode
     ),
     created = created,
+    idColision = idColision,
     properties = ShortUrlProperties(
         sponsor = sponsor,
         owner = owner,
@@ -52,6 +53,7 @@ fun ShortUrlEntity.toDomain() = ShortUrl(
         qrBool = qrBool,
         qrReady = qrReady
     )
+
 )
 
 /**
@@ -68,5 +70,6 @@ fun ShortUrl.toEntity() = ShortUrlEntity(
     ip = properties.ip,
     country = properties.country,
     qrBool = properties.qrBool,
-    qrReady = properties.qrReady
+    qrReady = properties.qrReady,
+    idColision = idColision
 )
