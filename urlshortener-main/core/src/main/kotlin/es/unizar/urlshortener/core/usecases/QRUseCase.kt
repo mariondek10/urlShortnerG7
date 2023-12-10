@@ -27,8 +27,8 @@ class QRUseCaseImpl(
 ) : QRUseCase {
 
     override fun generateQR(id: String, url: String) {
-        shortUrlRepository.findByKey(id)?.let {
-            if (it.properties.qrBool == true) {
+        shortUrlRepository.findByKey(id)?.let {shortUrl ->
+            if (shortUrl.properties.qrReady == false) { //No esta generado todavia
                 //System.out.println("(QRUSECASE) CREANDO QR it.properties.qrBool:" + it.properties.qrBool)
                 val image = ByteArrayOutputStream()
                 //System.out.println("(QRUSECASE) IMAGE CREADA")
@@ -38,6 +38,10 @@ class QRUseCaseImpl(
                 //System.out.println("(QRUSECASE) qr.writeImage(image)")
                 val byteArray = image.toByteArray()
                 qrMap.put(id, byteArray)
+                val data = true
+                shortUrl.properties.qrReady = true
+            } else{
+                //ya esta generado y no hay que hacer nada
             }
         } ?: throw RedirectionNotFound(id)
     }
@@ -46,7 +50,7 @@ class QRUseCaseImpl(
             //Code based on: https://github.com/g0dkar/qrcode-kotlin#spring-framework-andor-spring-boot
             shortUrlRepository.findByKey(id)?.let { shortUrl ->
                 //System.out.println("(QRUSECASE) shortUrl:" + shortUrl)
-                if (shortUrl.properties.qrBool == true) {
+                if (shortUrl.properties.qrReady == true) {
                     //System.out.println("(QRUSECASE) qrBool es true y el id es:" + id)
                     qrMap.get(id)
                 } else {

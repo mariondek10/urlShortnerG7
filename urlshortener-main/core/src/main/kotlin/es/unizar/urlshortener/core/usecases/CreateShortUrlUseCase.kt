@@ -39,6 +39,7 @@ class CreateShortUrlUseCaseImpl(
                                 ip = data.ip,
                                 sponsor = data.sponsor,
                                 qrBool = data.qrBool,
+                                qrReady = data.qrReady
                             )
                         )
                         shortUrlRepository.save(su)
@@ -56,7 +57,9 @@ class CreateShortUrlUseCaseImpl(
                                 safe = data.safe,
                                 ip = data.ip,
                                 sponsor = data.sponsor,
-                                qrBool = data.qrBool
+                                qrBool = data.qrBool,
+                                qrReady = data.qrReady
+
                             )
                         )
                         System.out.println("(CreateShortUrlUseCase) antes de save su: ShortUrl:" + su)

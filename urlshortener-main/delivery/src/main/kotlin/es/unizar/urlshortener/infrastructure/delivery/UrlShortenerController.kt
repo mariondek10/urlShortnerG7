@@ -59,7 +59,9 @@ data class ShortUrlDataIn(
     val url: String,
     val sponsor: String? = null,
     val alias: String? = null,
-    val qrBool: Boolean
+    val qrBool: Boolean,
+    val qrReady: Boolean,
+
 
 )
 
@@ -119,7 +121,9 @@ class UrlShortenerControllerImpl(
                 ip = request.remoteAddr,
                 sponsor = data.sponsor,
                 alias = data.alias,
-                qrBool = data.qrBool
+                qrBool = data.qrBool,
+                qrReady = false
+
             )
         ).let {
             System.out.println("(UrlShortenerController) datos APP.js: ShortUrlDataIn:" + data)
