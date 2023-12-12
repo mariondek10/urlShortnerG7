@@ -153,7 +153,20 @@ class UrlShortenerControllerImpl(
             val response = CsvDataOut(
                 csv = processedData
             )
-            ResponseEntity<CsvDataOut>(response, HttpStatus.OK)
+            when (processedData) {
+                "ok" -> {
+                    ResponseEntity<CsvDataOut>(response, HttpStatus.OK)
+                }
+                "Invalid CSV: missing semicolons, the amount of semicolons must be 3 per line" -> {
+                    ResponseEntity<CsvDataOut>(response, HttpStatus.BAD_REQUEST)
+                }
+                "Invalid CSV: too many semicolons in a line, should be 3 per line" -> {
+                    ResponseEntity<CsvDataOut>(response, HttpStatus.BAD_REQUEST)
+                }
+                else -> {
+                    ResponseEntity<CsvDataOut>(response, HttpStatus.CREATED)
+                }
+            }            
         }
 
     @GetMapping("/{id:(?!api|index).*}/qr")

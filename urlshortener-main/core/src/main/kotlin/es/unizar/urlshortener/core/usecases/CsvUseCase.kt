@@ -47,6 +47,25 @@ class CsvUseCaseImpl(
     private val temp: Int
 ) : CsvUseCase {
     override fun convert(csvData: String): String {
+        // Case 1: empty csvData
+        if (csvData.isBlank()) {
+            return "ok"
+        }
+
+        // Case 2: invaid csvData
+        // We check if csv has at least 3 ; per \n
+        val semicolonCount = csvData.count { it == ';' }
+        if (semicolonCount % 3 != 0) {
+            // Handle the case where the semicolon count is not a multiple of 3
+            return "Invalid CSV: missing semicolons, the amount of semicolons must be 3 per line"
+        }
+        // We check if csv has the correct number of \n per ;
+        val endlnCount = csvData.count { it == '\n' }
+        if (endlnCount + 1 < semicolonCount / 3) { // Plus one becaus the last line may not have a \n
+            // Too many ; per \n
+            return "Invalid CSV: too many semicolons in a line, should be 3 per line"
+        }
+
         // We convert selector to int
         val rows = csvData.split("\n")
         var newCell = ""
