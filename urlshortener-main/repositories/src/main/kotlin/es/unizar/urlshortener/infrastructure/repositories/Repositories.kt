@@ -1,5 +1,6 @@
 package es.unizar.urlshortener.infrastructure.repositories
 
+import es.unizar.urlshortener.core.Click
 import org.springframework.data.jpa.repository.JpaRepository
 
 /**
@@ -16,4 +17,6 @@ interface ShortUrlEntityRepository : JpaRepository<ShortUrlEntity, Long> {
  *
  * **Note**: Spring Boot is able to discover this [JpaRepository] without further configuration.
  */
-interface ClickEntityRepository : JpaRepository<ClickEntity, Long>
+interface ClickEntityRepository : JpaRepository<ClickEntity, Long> {
+    fun findAllByHash(hash: String): List<ClickEntity>
+}

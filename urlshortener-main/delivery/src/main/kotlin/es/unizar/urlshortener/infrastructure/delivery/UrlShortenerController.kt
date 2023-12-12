@@ -7,6 +7,7 @@ import es.unizar.urlshortener.core.usecases.*
 import es.unizar.urlshortener.core.usecases.LogClickUseCase
 import es.unizar.urlshortener.core.usecases.RedirectUseCase
 import es.unizar.urlshortener.core.usecases.QRUseCase
+import eu.bitwalker.useragentutils.UserAgent
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.hateoas.server.mvc.linkTo
 import org.springframework.http.HttpHeaders
@@ -21,6 +22,7 @@ import org.springframework.core.io.ByteArrayResource
 import java.net.URI
 import org.springframework.http.MediaType.IMAGE_PNG_VALUE
 import java.util.concurrent.BlockingQueue
+
 
 /**
  * The specification of the controller.
@@ -49,6 +51,8 @@ interface UrlShortenerController {
     fun csvHandler(data: CsvDataIn, request: HttpServletRequest): ResponseEntity<CsvDataOut>
 
     fun getQR(id: String, request: HttpServletRequest): ResponseEntity<ByteArrayResource>
+
+    fun returnInfoHeader(id: String, request: HttpServletRequest): ResponseEntity<Any>
 
 }
 
@@ -98,14 +102,19 @@ class UrlShortenerControllerImpl(
     val createShortUrlUseCase: CreateShortUrlUseCase,
     val csvUseCase: CsvUseCase,
     val qrUseCase: QRUseCase,
-    val qrQueue: BlockingQueue<Pair<String, String>>
+    val qrQueue: BlockingQueue<Pair<String, String>>,
+    val identifyInfoClientUseCase: IdentifyInfoClientUseCase
 
 ) : UrlShortenerController {
 
     @GetMapping("/{id:(?!api|index).*}")
     override fun redirectTo(@PathVariable id: String, request: HttpServletRequest): ResponseEntity<Unit> =
         redirectUseCase.redirectTo(id).let {
-            logClickUseCase.logClick(id, ClickProperties(ip = request.remoteAddr))
+            val header = request.getHeader("User-Agent")
+            val userAgent = UserAgent.parseUserAgentString(header)
+            val browser = userAgent.browser.getName()
+            val platform = userAgent.operatingSystem.getName()
+            logClickUseCase.logClick(id, ClickProperties(ip = request.remoteAddr, browser = browser, platform = platform))
             val h = HttpHeaders()
             h.location = URI.create(it.target)
             ResponseEntity<Unit>(h, HttpStatus.valueOf(it.mode))
@@ -158,6 +167,9 @@ class UrlShortenerControllerImpl(
             ResponseEntity<CsvDataOut>(response, HttpStatus.OK)
         }
 
+
+
+
     @GetMapping("/{id:(?!api|index).*}/qr")
     override fun getQR(@PathVariable id: String, request: HttpServletRequest): ResponseEntity<ByteArrayResource> =
         qrUseCase.getQRUseCase(id).let { qr ->
@@ -166,5 +178,10 @@ class UrlShortenerControllerImpl(
             System.out.println("(UrlShortenerController) qr del getQRUseCase:" + qr)
             ResponseEntity<ByteArrayResource>(ByteArrayResource(qr, IMAGE_PNG_VALUE), h, HttpStatus.OK)
         }
+
+    @GetMapping("/api/link/{id}")
+    override fun returnInfoHeader(@PathVariable id: String, request: HttpServletRequest): ResponseEntity<Any> {
+        return ResponseEntity(identifyInfoClientUseCase.returnInfoShortUrl(id), HttpStatus.OK)
+    }
 
 }

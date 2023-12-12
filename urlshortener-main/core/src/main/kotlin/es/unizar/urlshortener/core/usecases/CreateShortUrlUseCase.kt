@@ -23,6 +23,16 @@ class CreateShortUrlUseCaseImpl(
     private val validatorService: ValidatorService,
     private val hashService: HashService
 ) : CreateShortUrlUseCase {
+
+    /**
+     * Creates a short URL based on the provided long URL and optional data.
+     *
+     * @param url The long URL for which a short URL needs to be created.
+     * @param data Optional data that can be added during URL creation.
+     * @return The generated ShortUrl object representing the shortened URL.
+     * @throws InvalidUrlException If the provided URL is invalid.
+     * @throws UrlToShortNotReachable If the URL to be shortened is not reachable.
+     */
     override fun create(url: String, data: ShortUrlProperties): ShortUrl = when {
             !validatorService.isValid(url) -> throw InvalidUrlException(url)
             !isReachableUseCase.isReachable(url) -> throw UrlToShortNotReachable(url)
@@ -69,6 +79,5 @@ class CreateShortUrlUseCaseImpl(
             }
 
         }
-
 
 }
