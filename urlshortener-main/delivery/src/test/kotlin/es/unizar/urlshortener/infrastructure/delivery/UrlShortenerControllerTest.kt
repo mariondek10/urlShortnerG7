@@ -204,4 +204,26 @@ class UrlShortenerControllerTest {
                 .andExpect(content().contentType(MediaType.IMAGE_PNG))
                 .andExpect(content().bytes("Testing".toByteArray()))
     }
+
+    @Test
+    fun `if the key already exists, returns a 400 error`() {
+        val existingKey = "existing-key"
+        val existingUrl = "http://example.com/"
+
+        // Set up mock behavior to simulate the key already existing
+        given(createShortUrlUseCase.create(url = existingUrl, data = ShortUrlProperties(ip = "127.0.0.1")))
+            .willAnswer { throw KeyAlreadyExists(existingKey) }
+
+        // Perform the HTTP request and check for a 400 error
+        mockMvc.perform(
+            post("/api/link")
+                .param("url", existingUrl)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.statusCode").value(400))
+            .andExpect(jsonPath("$.message").value("Key already exists: $existingKey"))
+    }
+
+
 }

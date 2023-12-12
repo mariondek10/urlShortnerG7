@@ -7,3 +7,4 @@ spring:
     driverClassName: org.hsqldb.jdbc.JDBCDriver
   jpa:
     open-in-view: false
+    show-sql: true

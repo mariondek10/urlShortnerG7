@@ -40,15 +40,15 @@ class CreateShortUrlUseCaseImpl(
                 shortUrlRepository.findByKey(hashService.hasUrl(url))?.let { shortUrl ->
                     if (shortUrl.properties.qrBool == false && data.qrBool == true) {
                         //no esta el qr(false) y se requiere (true)
-                        val id: String = data.alias ?: hashService.hasUrl(url)
+                        val hash: String = data.alias ?: hashService.hasUrl(url)
                         val su = ShortUrl(
-                            hash = id,
+                            hash = hash,
                             redirection = Redirection(target = url),
                             properties = ShortUrlProperties(
-                                safe = shortUrl.properties.safe,
                                 ip = data.ip,
                                 sponsor = data.sponsor,
-                                qrBool = data.qrBool,
+                                safe = shortUrl.properties.safe,
+                                qrBool = data.qrBool
                             )
                         )
                         shortUrlRepository.save(su)
@@ -58,14 +58,14 @@ class CreateShortUrlUseCaseImpl(
                 }?: run{
                     if (validatorService.isValid(url)) {
                         System.out.println("(CreateShortUrlUseCase) data: ShortUrlProperties:" + data)
-                        val id: String = data.alias ?: hashService.hasUrl(url)
+                        val hash: String = data.alias ?: hashService.hasUrl(url)
                         val su = ShortUrl(
-                            hash = id,
+                            hash = hash,
                             redirection = Redirection(target = url),
                             properties = ShortUrlProperties(
-                                safe = data.safe,
                                 ip = data.ip,
                                 sponsor = data.sponsor,
+                                safe = data.safe,
                                 qrBool = data.qrBool
                             )
                         )
