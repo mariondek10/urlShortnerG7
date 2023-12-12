@@ -23,7 +23,6 @@ fun ClickEntity.toDomain() = Click(
  * Extension method to convert a domain [Click] into a [ClickEntity].
  */
 fun Click.toEntity() = ClickEntity(
-    id = null,
     hash = hash,
     created = created,
     ip = properties.ip,
@@ -37,7 +36,7 @@ fun Click.toEntity() = ClickEntity(
  * Extension method to convert a [ShortUrlEntity] into a domain [ShortUrl].
  */
 fun ShortUrlEntity.toDomain() = ShortUrl(
-    hash = hash,
+   hash = hash,
     redirection = Redirection(
         target = target,
         mode = mode
@@ -57,6 +56,7 @@ fun ShortUrlEntity.toDomain() = ShortUrl(
  * Extension method to convert a domain [ShortUrl] into a [ShortUrlEntity].
  */
 fun ShortUrl.toEntity() = ShortUrlEntity(
+    id = null,
     hash = hash,
     target = redirection.target,
     mode = redirection.mode,
