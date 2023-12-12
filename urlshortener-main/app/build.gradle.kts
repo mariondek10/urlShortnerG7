@@ -11,6 +11,8 @@ dependencies {
     implementation("org.webjars:jquery:${Version.JQUERY}")
     implementation("org.springframework.boot:spring-boot-starter")
 
+
+
     runtimeOnly("org.hsqldb:hsqldb")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
