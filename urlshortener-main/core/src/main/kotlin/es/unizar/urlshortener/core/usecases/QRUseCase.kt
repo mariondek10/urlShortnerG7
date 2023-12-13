@@ -7,14 +7,25 @@ import java.io.ByteArrayOutputStream
 import io.github.g0dkar.qrcode.QRCode
 
 
+
 /**
- * Given an url returns the key that is used to create a short URL.
- * When the url is created optional data may be added.
- *
- * **Note**: This is an example of functionality.
+ * Given a URI saves a QR code that links to the resource passed.
  */
 interface QRUseCase {
+    /**
+     * @brief Generate the QR for the shortened URL, if it is required
+     *
+     * @param id The shortened URL's string
+     * @param url The shortened URL's String
+     */
     fun generateQR(id: String, url: String)
+
+    /**
+     * @brief Get the QR for the shortened URL, if it exists
+     *
+     * @param id The shortened URL's string
+     * @return The QR code data in ByteArray.
+     */
     fun getQRUseCase(id: String): ByteArray
 }
 
@@ -53,38 +64,4 @@ class QRUseCaseImpl(
                     throw QRNotAvailable(id)
                 }
             } ?: throw RedirectionNotFound(id)
-
-    /*
-
-
-
-    when {
-            !validatorService.isValid(url) -> throw InvalidUrlException(url)
-            !isReachableUseCase.isReachable(url) -> throw UrlToShortNotReachable(url)
-            else -> {
-
-
-
-    override fun getQRUseCase(id: String): ByteArray =
-    //Code based on: https://github.com/g0dkar/qrcode-kotlin#spring-framework-andor-spring-boot
-    shortUrlRepository.findByKey(id)?.let { shortUrl ->
-        System.out.println("(QRUSECASE) shortUrl:" + shortUrl)
-        if (shortUrl.properties.qrBool == true) {
-            qrMap.computeIfAbsent(id) {
-                System.out.println("(QRUSECASE) computeIfAbsent: NO LO HA ENCONTRADO")
-                val image = ByteArrayOutputStream()
-                QRCode(id).render().writeImage(image)
-
-                val byteArray = image.toByteArray()
-                requireNotNull(byteArray) { "Byte array is null" }
-                qrMap.put(id, byteArray)
-                byteArray
-
-                //qrMap.put(id, image.toByteArray())
-
-            }
-        } else {
-            throw InvalidUrlException("QR")
-        }
-    } ?: throw RedirectionNotFound(id)*/
 }

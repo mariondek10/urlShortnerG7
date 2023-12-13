@@ -27,5 +27,7 @@ class ShortUrlRepositoryServiceImpl(
     override fun findByKey(id: String): ShortUrl? = shortUrlEntityRepository.findByHash(id)?.toDomain()
 
     override fun save(su: ShortUrl): ShortUrl = shortUrlEntityRepository.save(su.toEntity()).toDomain()
+
+    override fun delete(su: ShortUrl) = shortUrlEntityRepository.delete(su.toEntity())
 }
 

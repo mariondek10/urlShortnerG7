@@ -50,6 +50,11 @@ interface UrlShortenerController {
      */
     fun csvHandler(data: CsvDataIn, request: HttpServletRequest): ResponseEntity<CsvDataOut>
 
+    /**
+     * Obtains the QR data giving the URL id in [id].
+     *
+     * **Note**: Delivery of use case [QRUseCase].
+     */
     fun getQR(id: String, request: HttpServletRequest): ResponseEntity<ByteArrayResource>
 
     fun returnInfoHeader(id: String, request: HttpServletRequest): ResponseEntity<Any>

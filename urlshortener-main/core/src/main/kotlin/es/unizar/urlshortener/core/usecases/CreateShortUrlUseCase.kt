@@ -56,7 +56,8 @@ class CreateShortUrlUseCaseImpl(
                                 qrBool = data.qrBool
                             )
                         )
-                        shortUrlRepository.save(su)
+                        shortUrlRepository.delete(shortUrl) //borramos la que habia
+                        shortUrlRepository.save(su)//guardamos la nueva con lo paramteros cambiados
                     } else {
                         shortUrl
                     }
