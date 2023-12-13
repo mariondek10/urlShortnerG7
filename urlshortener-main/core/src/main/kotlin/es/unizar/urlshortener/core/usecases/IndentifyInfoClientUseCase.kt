@@ -12,23 +12,18 @@ import es.unizar.urlshortener.core.*
  *
  */
 interface IdentifyInfoClientUseCase {
-        fun returnInfoShortUrl(id: String): List<InfoClient>
+        fun returnInfoShortUrl(id: String): Map<String, Int>
 }
 
-data class InfoClient (
-    val ip: String? = null,
-    val browser: String? = null,
-    val platform: String? = null,
-)
 
 class IdentifyInfoClientUseCaseImpl(
     private val clickRepository: ClickRepositoryService
 ) : IdentifyInfoClientUseCase {
 
-    override fun returnInfoShortUrl(id: String): List<InfoClient> {
-       val clicks = clickRepository.findByUrlHash(id)
-        return clicks.map{
-            InfoClient(it.properties.ip, it.properties.browser, it.properties.platform)
-        }
+    override fun returnInfoShortUrl(id: String): Map<String, Int> {
+        val clicks = clickRepository.findByUrlHash(id)
+        return clicks
+            .groupBy { "${it.properties.platform} - ${it.properties.browser}" }
+            .mapValues { (_, value) -> value.size }
     }
 }
