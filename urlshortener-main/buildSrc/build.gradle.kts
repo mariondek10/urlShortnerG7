@@ -16,4 +16,5 @@ dependencies {
     implementation("org.jetbrains.kotlin.plugin.jpa:org.jetbrains.kotlin.plugin.jpa.gradle.plugin:$kotlinVersion")
     implementation("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
     implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:$detektVersion")
+    implementation("org.jetbrains.kotlinx:kover-gradle-plugin:0.7.4")
 }
