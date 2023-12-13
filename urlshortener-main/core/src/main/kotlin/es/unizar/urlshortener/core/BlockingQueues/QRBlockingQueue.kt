@@ -1,4 +1,4 @@
-package es.unizar.urlshortener.core.BlockingQueue
+package es.unizar.urlshortener.core.BlockingQueues
 
 import es.unizar.urlshortener.core.usecases.QRUseCase
 import org.springframework.scheduling.annotation.Async
