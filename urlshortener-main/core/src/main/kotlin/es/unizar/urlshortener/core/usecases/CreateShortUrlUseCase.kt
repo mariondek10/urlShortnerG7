@@ -3,6 +3,7 @@
 package es.unizar.urlshortener.core.usecases
 
 import es.unizar.urlshortener.core.*
+import kotlin.math.log
 
 /**
  * Given an url returns the key that is used to create a short URL.
@@ -21,7 +22,8 @@ class CreateShortUrlUseCaseImpl(
     private val shortUrlRepository: ShortUrlRepositoryService,
     private val isReachableUseCase: IsReachableUseCase,
     private val validatorService: ValidatorService,
-    private val hashService: HashService
+    private val hashService: HashService,
+        private var clave: Int = 0
 ) : CreateShortUrlUseCase {
 
     /**
@@ -37,6 +39,7 @@ class CreateShortUrlUseCaseImpl(
             !validatorService.isValid(url) -> throw InvalidUrlException(url)
             !isReachableUseCase.isReachable(url) -> throw UrlToShortNotReachable(url)
             else -> {
+                clave += 1
                 shortUrlRepository.findByKey(hashService.hasUrl(url))?.let { shortUrl ->
                     if (shortUrl.properties.qrBool == false && data.qrBool == true) {
                         //no esta el qr(false) y se requiere (true)
@@ -47,7 +50,7 @@ class CreateShortUrlUseCaseImpl(
                             hashService.hasUrl(url)
                         }
                         val su = ShortUrl(
-                            hash = hash,
+                            hash = hash + clave.toString() ,
                             redirection = Redirection(target = url),
                             properties = ShortUrlProperties(
                                 ip = data.ip,
@@ -56,8 +59,17 @@ class CreateShortUrlUseCaseImpl(
                                 qrBool = data.qrBool
                             )
                         )
-                        shortUrlRepository.delete(shortUrl) //borramos la que habia
-                        shortUrlRepository.save(su)//guardamos la nueva con lo paramteros cambiados
+                        /*System.out.println("BORRANDOOOOOO")
+                        //borramos la que habia
+                        if (shortUrlRepository.delete(shortUrl)){
+                            System.out.println("es trueeeeee")
+                            //guardamos la nueva
+
+                        }else{
+                            su
+                        }*/
+                        shortUrlRepository.save(su)
+
                     } else {
                         shortUrl
                     }
@@ -71,7 +83,7 @@ class CreateShortUrlUseCaseImpl(
                             hashService.hasUrl(url)
                         }
                         val su = ShortUrl(
-                            hash = hash,
+                            hash = hash + clave.toString(),
                             redirection = Redirection(target = url),
                             properties = ShortUrlProperties(
                                 ip = data.ip,

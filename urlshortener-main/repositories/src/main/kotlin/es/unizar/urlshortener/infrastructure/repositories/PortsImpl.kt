@@ -28,6 +28,10 @@ class ShortUrlRepositoryServiceImpl(
 
     override fun save(su: ShortUrl): ShortUrl = shortUrlEntityRepository.save(su.toEntity()).toDomain()
 
-    override fun delete(su: ShortUrl) = shortUrlEntityRepository.delete(su.toEntity())
+    override fun delete(su: ShortUrl): Boolean {
+        val deletedEntity = shortUrlEntityRepository.delete(su.toEntity())
+        return deletedEntity != null
+
+    }
 }
 
