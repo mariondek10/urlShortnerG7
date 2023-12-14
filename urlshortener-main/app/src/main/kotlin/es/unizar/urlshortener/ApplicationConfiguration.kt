@@ -52,7 +52,7 @@ class ApplicationConfiguration(
     fun qRUseCase() = QRUseCaseImpl(shortUrlRepositoryService(), qrMap())
 
     @Bean
-    fun isReachableUseCase() = IsReachableUseCaseImpl(validatorService())
+    fun isReachableUseCase() = IsReachableUseCaseImpl()
 
     @Bean
     fun createShortUrlUseCase() =
