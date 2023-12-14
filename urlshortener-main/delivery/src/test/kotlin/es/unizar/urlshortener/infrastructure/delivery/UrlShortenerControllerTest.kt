@@ -205,6 +205,9 @@ class UrlShortenerControllerTest {
                 .andExpect(content().bytes("Testing".toByteArray()))
     }
 
+    /**
+     * Test that the controller returns a 400 error if the key already exists
+     */
     @Test
     fun `if the key already exists, returns a 400 error`() {
         val existingKey = "existing-key"
@@ -224,6 +227,10 @@ class UrlShortenerControllerTest {
             .andExpect(jsonPath("$.statusCode").value(400))
             .andExpect(jsonPath("$.message").value("Key already exists: $existingKey"))
     }
+
+    /**
+     * Test that the controller returns a 400 error if the alias contains a slash
+     */
 
     @Test
     fun `if the alias contains a slash, returns a 400 error`(){
