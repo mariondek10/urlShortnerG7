@@ -68,7 +68,7 @@ class CsvUseCaseImpl(
 
         // We convert selector to int
         val rows = csvData.split("\n")
-        var newCell = ""
+        //var newCell = ""
         //println("Rows: " + rows)
         val modifiedData = rows.joinToString("") { row ->
             if (row.isBlank()) {
@@ -80,7 +80,7 @@ class CsvUseCaseImpl(
                     val cell3 = cells.getOrNull(2) ?: ""
                 
                     try {      
-                        newCell = shortenUri(cell1,cell2,cell3)
+                        var newCell = shortenUri(cell1,cell2,cell3)
                         "$cell1;$newCell;\n"
                     } catch (e: MalformedURLException) {
                         // Handle invalid URL
@@ -149,8 +149,10 @@ class CsvUseCaseImpl(
                 val keyValue = pair.trim().split(";")
                 //println(keyValue)
                 if (true) {
-                    val key = keyValue[0].trim().removeSurrounding("\"")
-                    val value = keyValue[1].trim().removeSurrounding("\"")
+                    // key = keyValue[0].trim().removeSurrounding("\"")
+                    keyValue[0].trim().removeSurrounding("\"")
+                    //val value = keyValue[1].trim().removeSurrounding("\"")
+                    keyValue[1].trim().removeSurrounding("\"")
                     //qr = keyValue[2].trim().removeSurrounding("\"")
                 }
             }
