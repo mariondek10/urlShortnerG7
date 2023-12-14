@@ -225,5 +225,20 @@ class UrlShortenerControllerTest {
             .andExpect(jsonPath("$.message").value("Key already exists: $existingKey"))
     }
 
+    @Test
+    fun `if the alias contains a slash, returns a 400 error`(){
+        val existingUrl = "http://example.com/"
+        val alias = "alias/with/slash"
+        mockMvc.perform(
+            post("/api/link")
+                .param("url", existingUrl)
+                .param("alias", alias)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.statusCode").value(400))
+            .andExpect(jsonPath("$.message").value("Alias contains a slash: $alias"))
+    }
+
 
 }
