@@ -57,6 +57,12 @@ interface UrlShortenerController {
      */
     fun getQR(id: String, request: HttpServletRequest): ResponseEntity<ByteArrayResource>
 
+    /**
+     * Retrieves header information for a given ID from the HTTP request.
+     * @param id The ID representing the hash where the user is redirected
+     * @param request The HttpServletRequest containing the header information
+     * @return ResponseEntity containing the header information of all clicks to a given hash
+     */
     fun returnInfoHeader(id: String, request: HttpServletRequest): ResponseEntity<Any>
 
 }

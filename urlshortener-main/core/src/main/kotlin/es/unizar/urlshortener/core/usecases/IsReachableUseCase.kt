@@ -2,7 +2,6 @@
 
 package es.unizar.urlshortener.core.usecases
 
-import es.unizar.urlshortener.core.*
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -14,12 +13,25 @@ import java.net.URL
  *
  */
 interface IsReachableUseCase {
+    /**
+     * Checks if the provided URL is reachable.
+     * @param url The URL to check for reachability
+     * @return Boolean indicating if the URL is reachable
+     */
     fun isReachable(url: String): Boolean
 }
 
-class IsReachableUseCaseImpl(
-    private val validatorService: ValidatorService
-) : IsReachableUseCase {
+/**
+ * Implementation of IsReachableUseCase interface.
+ */
+class IsReachableUseCaseImpl
+    : IsReachableUseCase {
+
+    /**
+     * Checks if the provided URL is reachable by making a GET request and verifying the response code.
+     * @param url The URL to check for reachability
+     * @return Boolean indicating if the URL is reachable
+     */
     override fun isReachable(url: String): Boolean {
         var attempts = 0
         val maxAttempts = 3
