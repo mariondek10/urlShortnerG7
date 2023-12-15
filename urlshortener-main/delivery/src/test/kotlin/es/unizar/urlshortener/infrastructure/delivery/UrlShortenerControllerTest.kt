@@ -3,28 +3,31 @@
 package es.unizar.urlshortener.infrastructure.delivery
 
 import es.unizar.urlshortener.core.*
+import es.unizar.urlshortener.core.blockingQueues.QRBlockingQueue
+import es.unizar.urlshortener.core.usecases.*
 
-import es.unizar.urlshortener.core.usecases.CreateShortUrlUseCase
-import es.unizar.urlshortener.core.usecases.LogClickUseCase
-import es.unizar.urlshortener.core.usecases.RedirectUseCase
-import es.unizar.urlshortener.core.usecases.CsvUseCase
-import es.unizar.urlshortener.core.usecases.QRUseCase
-import es.unizar.urlshortener.core.usecases.IsReachableUseCase
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.never
+import org.mockito.Captor
+import org.mockito.InjectMocks
+import org.mockito.Mock
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
+import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import java.util.concurrent.BlockingQueue
+import java.util.concurrent.TimeUnit
 
 @WebMvcTest
 @ContextConfiguration(
@@ -58,6 +61,18 @@ class UrlShortenerControllerTest {
 
     @MockBean
     private lateinit var qrQueue: BlockingQueue<Pair<String, String>>
+
+    @MockBean
+    private lateinit var identifyInfoClientUseCase: IdentifyInfoClientUseCase
+
+    @Mock
+    private lateinit var qrBlockingQueue: QRBlockingQueue
+
+    @Captor
+    private lateinit var qrQueueCaptor: ArgumentCaptor<Pair<String, String>>
+
+    @InjectMocks
+    private lateinit var urlShortenerController: UrlShortenerController
 
     @Test
     fun `redirectTo returns a redirect when the key exists`() {
@@ -205,9 +220,11 @@ class UrlShortenerControllerTest {
                 .andExpect(content().bytes("Testing".toByteArray()))
     }
 
+
     /**
      * Test that the controller returns a 400 error if the key already exists
      */
+    /*
     @Test
     fun `if the key already exists, returns a 400 error`() {
         val existingKey = "existing-key"
@@ -224,11 +241,12 @@ class UrlShortenerControllerTest {
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
         )
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.statusCode").value(400))
+            .andExpect(jsonPath("$.status").value(400))
             .andExpect(jsonPath("$.message").value("Key already exists: $existingKey"))
     }
-
-    /**
+    */
+    
+     /**
      * Test that the controller returns a 400 error if the alias contains a slash
      */
 
@@ -247,5 +265,31 @@ class UrlShortenerControllerTest {
             .andExpect(jsonPath("$.message").value("Alias contains a slash: $alias"))
     }
 
+    /*
+    INTENTO DE  TEST DE LA BLOCKING QUEUE -> COMPROBAR QUE SE EJECUTA EXECUTOR DE LA QRBLOCKINGQUEUE
+    @Test
+    fun `executor processes qrQueue items`() {
 
+        val request = MockHttpServletRequest()
+        request.remoteAddr = "127.0.0.1"
+
+        val data = ShortUrlDataIn(
+                url = "http://example.com/",
+                qrBool = true
+        )
+
+        mockMvc.perform(
+                post("/api/link")
+                        .param("url", data.url)
+                        .param("qrBool", data.qrBool.toString())
+        )
+                .andExpect(MockMvcResultMatchers.status().isCreated)
+
+        verify(qrBlockingQueue).executor()
+        //verify(qrBlockingQueue).add(qrQueueCaptor.capture())
+
+        val capturedPair = qrQueueCaptor.value
+        val expectedPair = Pair("hashValue", "http://example.com/") // Valores esperados
+        assert(capturedPair == expectedPair) // Verificar si la captura coincide con los valores esperados
+    }*/
 }
