@@ -22,8 +22,7 @@ class CreateShortUrlUseCaseImpl(
     private val shortUrlRepository: ShortUrlRepositoryService,
     private val isReachableUseCase: IsReachableUseCase,
     private val validatorService: ValidatorService,
-    private val hashService: HashService,
-        private var clave: Int = 0
+    private val hashService: HashService
 ) : CreateShortUrlUseCase {
 
     /**
@@ -39,9 +38,12 @@ class CreateShortUrlUseCaseImpl(
     override fun create(url: String, data: ShortUrlProperties): ShortUrl = when {
             !validatorService.isValid(url) -> throw InvalidUrlException(url)
             !isReachableUseCase.isReachable(url) -> throw UrlToShortNotReachable(url)
+            !validatorService.withoutSlash(data.alias) -> throw InvalidUrlException(url)
             else -> {
-                clave += 1
                 shortUrlRepository.findByKey(hashService.hasUrl(url))?.let { shortUrl ->
+                    if(shortUrl.properties.qrBool == true){
+                        throw KeyAlreadyExists(hashService.hasUrl(url))
+                    }
                     if (shortUrl.properties.qrBool == false && data.qrBool == true) {
                         //no esta el qr(false) y se requiere (true)
                         val hash : String = if(data.alias != "" ){
@@ -51,7 +53,7 @@ class CreateShortUrlUseCaseImpl(
                             hashService.hasUrl(url)
                         }
                         val su = ShortUrl(
-                            hash = hash + clave.toString() ,
+                            hash = hash,
                             redirection = Redirection(target = url),
                             properties = ShortUrlProperties(
                                 ip = data.ip,
@@ -69,34 +71,38 @@ class CreateShortUrlUseCaseImpl(
                         }else{
                             su
                         }*/
-                        shortUrlRepository.save(su)
+                        if(shortUrlRepository.findByKey(hash) == null){
+                            shortUrlRepository.save(su)
+                        } else{
+                            throw KeyAlreadyExists(hash)
+                        }
 
                     } else {
                         shortUrl
                     }
                 }?: run{
-                    if (validatorService.isValid(url) && validatorService.withoutSlash(data.alias)) {
-                        System.out.println("(CreateShortUrlUseCase) data: ShortUrlProperties:" + data)
-                        val hash : String = if(data.alias != "" ){
-                            System.out.println("AÑADIDO ALAISSSS" + data)
-                            data.alias
-                        } else{
-                            hashService.hasUrl(url)
-                        }
-                        val su = ShortUrl(
-                            hash = hash + clave.toString(),
+                    //System.out.println("(CreateShortUrlUseCase) data: ShortUrlProperties:" + data)
+                    val hash : String = if(data.alias != "" ){
+                        //System.out.println("AÑADIDO ALAISSSS" + data)
+                        data.alias
+                    }else{
+                        hashService.hasUrl(url)
+                    }
+                    val su = ShortUrl(
+                            hash = hash,
                             redirection = Redirection(target = url),
                             properties = ShortUrlProperties(
-                                ip = data.ip,
-                                sponsor = data.sponsor,
-                                safe = data.safe,
-                                qrBool = data.qrBool
+                                    ip = data.ip,
+                                    sponsor = data.sponsor,
+                                    safe = data.safe,
+                                    qrBool = data.qrBool
                             )
-                        )
-                        System.out.println("(CreateShortUrlUseCase) antes de save su: ShortUrl:" + su)
+                    )
+                    //System.out.println("(CreateShortUrlUseCase) antes de save su: ShortUrl:" + su)
+                    if(shortUrlRepository.findByKey(hash) == null){
                         shortUrlRepository.save(su)
-                    } else {
-                        throw InvalidUrlException(url)
+                    } else{
+                        throw KeyAlreadyExists(hash)
                     }
                 }
 
