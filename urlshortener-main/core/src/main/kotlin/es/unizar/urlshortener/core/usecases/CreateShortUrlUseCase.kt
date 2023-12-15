@@ -34,6 +34,7 @@ class CreateShortUrlUseCaseImpl(
      * @return The generated ShortUrl object representing the shortened URL.
      * @throws InvalidUrlException If the provided URL is invalid.
      * @throws UrlToShortNotReachable If the URL to be shortened is not reachable.
+     *
      */
     override fun create(url: String, data: ShortUrlProperties): ShortUrl = when {
             !validatorService.isValid(url) -> throw InvalidUrlException(url)
@@ -74,7 +75,7 @@ class CreateShortUrlUseCaseImpl(
                         shortUrl
                     }
                 }?: run{
-                    if (validatorService.isValid(url)) {
+                    if (validatorService.isValid(url) && validatorService.withoutSlash(data.alias)) {
                         System.out.println("(CreateShortUrlUseCase) data: ShortUrlProperties:" + data)
                         val hash : String = if(data.alias != "" ){
                             System.out.println("AÑADIDO ALAISSSS" + data)

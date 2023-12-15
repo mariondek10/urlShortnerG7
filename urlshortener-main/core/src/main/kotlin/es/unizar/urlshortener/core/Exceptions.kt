@@ -10,4 +10,7 @@ class UrlToShortNotReachable(url: String) : Exception("[$url] is not reachable, 
 
 class UrlRegisteredButNotReachable(key: String) : Exception("[$key] The Uri you're trying to redirect to is not reachable ")
 
+/**
+ * Exception thrown when a key already exists.
+ */
 class KeyAlreadyExists(key: String) : Exception("[$key] already exists")

@@ -26,6 +26,15 @@ interface ShortUrlRepositoryService {
  */
 interface ValidatorService {
     fun isValid(url: String): Boolean
+
+    /**
+     * Checks if the alias contains a slash
+     * @param alias
+     * @return true if the alias is valid
+     */
+    fun withoutSlash(alias: String?): Boolean{
+        return alias != null && !alias.contains("/")
+    }
 }
 
 /**
