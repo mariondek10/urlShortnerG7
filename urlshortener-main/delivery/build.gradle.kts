@@ -11,6 +11,8 @@ dependencies {
     implementation("commons-validator:commons-validator:${Version.COMMONS_VALIDATOR}")
     implementation("com.google.guava:guava:${Version.GUAVA}")
     implementation("eu.bitwalker:UserAgentUtils:1.21")
+    //implementation(project(mapOf("path" to ":buildSrc")))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
 
 
 
