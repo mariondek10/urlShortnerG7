@@ -21,14 +21,19 @@ $(document).ready(
                 console.log("isQRChecked:", isQRChecked)
 
                 console.log("url:", $("#url").val())
+
+                const data = {
+                    url: $("#url").val(),
+                    qrBool: isQRChecked,
+                };
+
+                if (alias.trim() === null) {
+                    data.alias = "";
+                }
                 $.ajax({
                     type: "POST",
                     url: "/api/link",
-                    data: {
-                        url: $("#url").val(),
-                        alias: alias,
-                        qrBool: isQRChecked
-                    },
+                    data: data,
                     success: async function (data, status, request) {
                         console.log("APP.js data recibida:", data)
 

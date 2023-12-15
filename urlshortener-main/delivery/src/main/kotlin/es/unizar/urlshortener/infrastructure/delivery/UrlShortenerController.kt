@@ -74,7 +74,7 @@ data class ShortUrlDataIn(
     val url: String,
     val sponsor: String? = null,
     val alias: String = "",
-    val qrBool: Boolean
+    val qrBool: Boolean? = null
 
 )
 
@@ -152,7 +152,7 @@ class UrlShortenerControllerImpl(
             //val properties = mutableMapOf<String, Any>("safe" to it.properties.safe)
             val properties = mutableMapOf<String, Any>()
 
-            if(data.qrBool){
+            if(data.qrBool == true){
                 System.out.println("(UrlShortenerController) LLAMANDO A  generateQR")
                 qrQueue.put(Pair(it.hash, url.toString()))
                 System.out.println("(UrlShortenerController) LLAMANDO A getQR():" + url.toString())
