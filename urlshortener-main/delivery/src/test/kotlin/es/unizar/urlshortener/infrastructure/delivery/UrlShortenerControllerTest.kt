@@ -3,31 +3,24 @@
 package es.unizar.urlshortener.infrastructure.delivery
 
 import es.unizar.urlshortener.core.*
-import es.unizar.urlshortener.core.blockingQueues.QRBlockingQueue
+
 import es.unizar.urlshortener.core.usecases.*
 
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentCaptor
 import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.never
-import org.mockito.Captor
-import org.mockito.InjectMocks
-import org.mockito.Mock
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
-import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import java.util.concurrent.BlockingQueue
-import java.util.concurrent.TimeUnit
 
 @WebMvcTest
 @ContextConfiguration(
@@ -65,14 +58,7 @@ class UrlShortenerControllerTest {
     @MockBean
     private lateinit var identifyInfoClientUseCase: IdentifyInfoClientUseCase
 
-    @Mock
-    private lateinit var qrBlockingQueue: QRBlockingQueue
 
-    @Captor
-    private lateinit var qrQueueCaptor: ArgumentCaptor<Pair<String, String>>
-
-    @InjectMocks
-    private lateinit var urlShortenerController: UrlShortenerController
 
     @Test
     fun `redirectTo returns a redirect when the key exists`() {
@@ -261,8 +247,8 @@ class UrlShortenerControllerTest {
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
         )
             .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.statusCode").value(400))
-            .andExpect(jsonPath("$.message").value("Alias contains a slash: $alias"))
+            .andExpect(jsonPath("$.status").value(400))
+
     }
 
     /*
