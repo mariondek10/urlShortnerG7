@@ -122,9 +122,9 @@ class UrlShortenerControllerImpl(
     override fun redirectTo(@PathVariable id: String, request: HttpServletRequest): ResponseEntity<Unit> =
         redirectUseCase.redirectTo(id).let {
             val header = request.getHeader("User-Agent")
-            val userAgent = UserAgent.parseUserAgentString(header)
-            val browser = userAgent.browser.getName()
-            val platform = userAgent.operatingSystem.getName()
+            val userAgent = header?.let { it -> UserAgent.parseUserAgentString(it) }
+            val browser = userAgent?.browser?.getName()
+            val platform = userAgent?.operatingSystem?.getName()
             logClickUseCase.logClick(id, ClickProperties(ip = request.remoteAddr, browser = browser, platform = platform))
             val h = HttpHeaders()
             h.location = URI.create(it.target)
