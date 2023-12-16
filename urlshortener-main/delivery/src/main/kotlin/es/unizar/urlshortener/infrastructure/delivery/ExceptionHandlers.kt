@@ -38,7 +38,23 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(value = [RedirectionNotFound::class])
     @ResponseStatus(HttpStatus.NOT_FOUND)
     fun redirectionNotFound(ex: RedirectionNotFound) = ErrorMessage(HttpStatus.NOT_FOUND.value(), ex.message)
+
+    @ResponseBody
+    @ExceptionHandler(value = [KeyAlreadyExists::class])
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun keyAlreadyExists(ex: KeyAlreadyExists) = ErrorMessage(HttpStatus.BAD_REQUEST.value(), ex.message)
+
+    @ResponseBody
+    @ExceptionHandler(value = [AliasAlreadyExists::class])
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun aliasAlreadyExists(ex: AliasAlreadyExists) = ErrorMessage(HttpStatus.BAD_REQUEST.value(), ex.message)
+
+    @ResponseBody
+    @ExceptionHandler(value = [AliasContainsSlash::class])
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun aliasContainsSlash(ex: AliasContainsSlash) = ErrorMessage(HttpStatus.BAD_REQUEST.value(), ex.message)
 }
+
 
 data class ErrorMessage(
     val statusCode: Int,

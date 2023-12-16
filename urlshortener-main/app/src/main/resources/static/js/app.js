@@ -1,6 +1,15 @@
 $(document).ready(
     function () {
 
+        /**
+         * 1. Interceptamos el evento submit del formulario
+         * 2. Prevenimos que se envíe el formulario
+         * 3. Recuperamos el valor del campo url
+         * 4. Enviamos una petición POST a /api/link
+         * 5. Si la petición es correcta, mostramos el resultado
+         * 6. Si la petición falla, mostramos el error
+         */
+
         $("#shortener").submit(
             function (event) {
                 event.preventDefault();
@@ -12,14 +21,19 @@ $(document).ready(
                 console.log("isQRChecked:", isQRChecked)
 
                 console.log("url:", $("#url").val())
+
+                const data = {
+                    url: $("#url").val(),
+                    qrBool: isQRChecked,
+                };
+
+                if (alias.trim() === null) {
+                    data.alias = "";
+                }
                 $.ajax({
                     type: "POST",
                     url: "/api/link",
-                    data: {
-                        url: $("#url").val(),
-                        alias: alias,
-                        qrBool: isQRChecked
-                    },
+                    data: data,
                     success: async function (data, status, request) {
                         console.log("APP.js data recibida:", data)
 

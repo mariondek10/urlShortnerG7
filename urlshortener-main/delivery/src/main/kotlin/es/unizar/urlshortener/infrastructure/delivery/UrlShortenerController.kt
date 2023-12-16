@@ -72,7 +72,7 @@ data class ShortUrlDataIn(
     val url: String,
     val sponsor: String? = null,
     val alias: String = "",
-    val qrBool: Boolean
+    val qrBool: Boolean? = null
 
 )
 
