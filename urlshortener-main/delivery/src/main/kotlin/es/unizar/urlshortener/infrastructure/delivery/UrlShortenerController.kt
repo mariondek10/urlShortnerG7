@@ -126,7 +126,6 @@ class UrlShortenerControllerImpl(
     @GetMapping("/{id:(?!api|index).*}")
     override fun redirectTo(@PathVariable id: String, request: HttpServletRequest): ResponseEntity<Unit> =
         runBlocking{
-            try{
                 val result = coroutineScope{
                     async(Dispatchers.IO){
                         redirectUseCase.redirectTo(id).let {
@@ -142,16 +141,10 @@ class UrlShortenerControllerImpl(
                     }
                 }
     result.await()
-    } catch(e: Exception){
-        val h = HttpHeaders()
-        h.location = URI.create("https://www.google.com")
-        ResponseEntity<Unit>(h, HttpStatus.valueOf(302))
-        }
     }
 
     @PostMapping("/api/link", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
     override fun shortener(data: ShortUrlDataIn, request: HttpServletRequest): ResponseEntity<ShortUrlDataOut> = runBlocking {
-        try{
             val result = coroutineScope {
                 async(Dispatchers.IO){
                     createShortUrlUseCase.create(
@@ -192,12 +185,6 @@ class UrlShortenerControllerImpl(
                 }
             }
             result.await()
-        } catch (e: Exception){
-            val h = HttpHeaders()
-            h.location = URI.create("https://www.google.com")
-            ResponseEntity<ShortUrlDataOut>(h, HttpStatus.valueOf(302))
-
-        }
     }
 
 
