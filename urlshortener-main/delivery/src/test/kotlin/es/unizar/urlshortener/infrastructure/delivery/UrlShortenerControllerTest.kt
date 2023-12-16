@@ -2,6 +2,7 @@
 
 package es.unizar.urlshortener.infrastructure.delivery
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import es.unizar.urlshortener.core.*
 
 import es.unizar.urlshortener.core.usecases.*
@@ -180,12 +181,13 @@ class UrlShortenerControllerTest {
             .andExpect(status().isBadRequest)
     }
 
-    /*
-    @Test
-    fun `returns headers sumary if url has been accesed (User-Agent null)`() {
 
+    @Test
+    fun `returnInfoShortUrl returns information if short url has been clicked`() {
+
+        val userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/11.0.696.68 Safari/535.19"
         val data: MutableMap<String, Int> = mutableMapOf()
-        data["MACOS"] = 1
+        data["Mac OS X - Chrome 11"] = 1
 
         given(redirectUseCase.redirectTo("key")).willReturn(Redirection("http://example.com/"))
         given(identifyInfoClientUseCase.returnInfoShortUrl("key")).willReturn(data)
@@ -197,10 +199,19 @@ class UrlShortenerControllerTest {
 
         mockMvc.perform(get("/api/link/{id}", "key"))
             .andExpect(status().isOk)
-
-        verify(logClickUseCase, times(1)).getSumary("key")
+            .andExpect(content().json(jacksonObjectMapper().writeValueAsString(data)))
     }
-     */
+
+    @Test
+    fun `redirectTo doesn't return a 4xx error if there are no headers`() {
+        given(redirectUseCase.redirectTo("key")).willReturn(Redirection("http://example.com/"))
+
+        // Si envio cabeceras vacias no genera ningun error de usuario
+        mockMvc.perform(get("/{id}", "key"))
+            .andExpect(status().isTemporaryRedirect)
+            .andExpect(redirectedUrl("http://example.com/"))
+
+    }
 
     @Test
     fun `if the key doesn't exist, qr will return a not found (404)`() {
