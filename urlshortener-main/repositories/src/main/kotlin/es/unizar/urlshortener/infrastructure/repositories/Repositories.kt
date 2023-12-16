@@ -24,7 +24,4 @@ interface ClickEntityRepository : JpaRepository<ClickEntity, Long> {
     fun findAllByHash(hash: String): List<ClickEntity>
 }
 
-/*interface UserRepository : CoroutineCrudRepository<SecurityProperties.User, Long> {
-    override suspend fun findById(id: Long): SecurityProperties.User?
-}*/
 

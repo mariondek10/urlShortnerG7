@@ -13,6 +13,8 @@ import java.time.OffsetDateTime
 @Suppress("LongParameterList")
 class ClickEntity(
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    val id: Long?,
     val hash: String,
     val created: OffsetDateTime,
     val ip: String?,

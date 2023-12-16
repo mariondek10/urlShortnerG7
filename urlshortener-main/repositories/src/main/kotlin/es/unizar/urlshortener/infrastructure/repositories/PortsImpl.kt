@@ -31,7 +31,6 @@ class ShortUrlRepositoryServiceImpl(
     override fun delete(su: ShortUrl): Boolean {
         val deletedEntity = shortUrlEntityRepository.delete(su.toEntity())
         return deletedEntity != null
-
     }
 }
 

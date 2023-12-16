@@ -20,6 +20,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MultiValueMap
 import java.util.concurrent.BlockingQueue
 
 @WebMvcTest
@@ -177,6 +179,28 @@ class UrlShortenerControllerTest {
         )
             .andExpect(status().isBadRequest)
     }
+
+    /*
+    @Test
+    fun `returns headers sumary if url has been accesed (User-Agent null)`() {
+
+        val data: MutableMap<String, Int> = mutableMapOf()
+        data["MACOS"] = 1
+
+        given(redirectUseCase.redirectTo("key")).willReturn(Redirection("http://example.com/"))
+        given(identifyInfoClientUseCase.returnInfoShortUrl("key")).willReturn(data)
+
+        mockMvc.perform(get("/{id}", "key")
+            .header("User-Agent", userAgent))
+            .andExpect(status().isTemporaryRedirect)
+            .andExpect(redirectedUrl("http://example.com/"))
+
+        mockMvc.perform(get("/api/link/{id}", "key"))
+            .andExpect(status().isOk)
+
+        verify(logClickUseCase, times(1)).getSumary("key")
+    }
+     */
 
     @Test
     fun `if the key doesn't exist, qr will return a not found (404)`() {
