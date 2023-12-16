@@ -88,7 +88,7 @@ class UrlShortenerControllerTest {
         given(
             createShortUrlUseCase.create(
                 url = "http://example.com/",
-                data = ShortUrlProperties(ip = "127.0.0.1")
+                data = ShortUrlProperties(ip = "127.0.0.1", qrBool = false, alias = "")
             )
         ).willReturn(ShortUrl("f684a3c4", Redirection("http://example.com/")))
 
@@ -96,6 +96,7 @@ class UrlShortenerControllerTest {
             post("/api/link")
                 .param("url", "http://example.com/")
                 .param("qrBool", "false")
+                .param("alias", "")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
         )
             .andDo(print())
