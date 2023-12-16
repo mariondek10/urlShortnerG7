@@ -2,26 +2,24 @@ package es.unizar.urlshortener.infrastructure.delivery
 
 import es.unizar.urlshortener.core.ClickProperties
 import es.unizar.urlshortener.core.ShortUrlProperties
-import es.unizar.urlshortener.core.usecases.CreateShortUrlUseCase
 import es.unizar.urlshortener.core.usecases.*
-import es.unizar.urlshortener.core.usecases.LogClickUseCase
-import es.unizar.urlshortener.core.usecases.RedirectUseCase
-import es.unizar.urlshortener.core.usecases.QRUseCase
 import eu.bitwalker.useragentutils.UserAgent
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.core.io.ByteArrayResource
 import org.springframework.hateoas.server.mvc.linkTo
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.MediaType.IMAGE_PNG_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.core.io.ByteArrayResource
 import java.net.URI
-import org.springframework.http.MediaType.IMAGE_PNG_VALUE
 import java.util.concurrent.BlockingQueue
+import kotlinx.coroutines.*
+
 
 
 /**
@@ -118,56 +116,77 @@ class UrlShortenerControllerImpl(
 
 ) : UrlShortenerController {
 
+    /**
+     * Redirects and logs a short url identified by its [id].
+     * @param id The ID representing the hash where the user is redirected
+     * @param request The HttpServletRequest containing the header information
+     * @return ResponseEntity containing the header information of all clicks to a given hash
+     * Use the coroutines library to make the call to the use case asynchronous
+     */
     @GetMapping("/{id:(?!api|index).*}")
     override fun redirectTo(@PathVariable id: String, request: HttpServletRequest): ResponseEntity<Unit> =
-        redirectUseCase.redirectTo(id).let {
-            val header = request.getHeader("User-Agent")
-            val userAgent = header?.let { it -> UserAgent.parseUserAgentString(it) }
-            val browser = userAgent?.browser?.getName()
-            val platform = userAgent?.operatingSystem?.getName()
-            logClickUseCase.logClick(id, ClickProperties(ip = request.remoteAddr, browser = browser, platform = platform))
-            val h = HttpHeaders()
-            h.location = URI.create(it.target)
-            ResponseEntity<Unit>(h, HttpStatus.valueOf(it.mode))
-        }
+        runBlocking{
+                val result = coroutineScope{
+                    async(Dispatchers.IO){
+                        redirectUseCase.redirectTo(id).let {
+                            val header = request.getHeader("User-Agent")
+                            val userAgent = header?.let { it -> UserAgent.parseUserAgentString(it) }
+                            val browser = userAgent?.browser?.getName()
+                            val platform = userAgent?.operatingSystem?.getName()
+                            logClickUseCase.logClick(id, ClickProperties(ip = request.remoteAddr, browser = browser, platform = platform))
+                            val h = HttpHeaders()
+                            h.location = URI.create(it.target)
+                            ResponseEntity<Unit>(h, HttpStatus.valueOf(it.mode))
+                        }
+                    }
+                }
+    result.await()
+    }
 
     @PostMapping("/api/link", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
-    override fun shortener(data: ShortUrlDataIn, request: HttpServletRequest): ResponseEntity<ShortUrlDataOut> =
-        createShortUrlUseCase.create(
-            url = data.url,
-            data = ShortUrlProperties(
-                ip = request.remoteAddr,
-                sponsor = data.sponsor,
-                alias = data.alias,
-                qrBool = data.qrBool
-            )
-        ).let {
-            System.out.println("(UrlShortenerController) datos APP.js: ShortUrlDataIn:" + data)
-            System.out.println("(UrlShortenerController) shortURL creada:" + it)
+    override fun shortener(data: ShortUrlDataIn, request: HttpServletRequest): ResponseEntity<ShortUrlDataOut> = runBlocking {
+            val result = coroutineScope {
+                async(Dispatchers.IO){
+                    createShortUrlUseCase.create(
+                        url = data.url,
+                        data = ShortUrlProperties(
+                            ip = request.remoteAddr,
+                            sponsor = data.sponsor,
+                            alias = data.alias,
+                            qrBool = data.qrBool
+                        )
+                    ).let {
+                        System.out.println("(UrlShortenerController) datos APP.js: ShortUrlDataIn:" + data)
+                        System.out.println("(UrlShortenerController) shortURL creada:" + it)
 
-            val h = HttpHeaders()
-            val url = linkTo<UrlShortenerControllerImpl> { redirectTo(it.hash, request) }.toUri()
-            h.location = url
+                        val h = HttpHeaders()
+                        val url = linkTo<UrlShortenerControllerImpl> { redirectTo(it.hash, request) }.toUri()
+                        h.location = url
 
-            //val properties = mutableMapOf<String, Any>("safe" to it.properties.safe)
-            val properties = mutableMapOf<String, Any>()
+                        //val properties = mutableMapOf<String, Any>("safe" to it.properties.safe)
+                        val properties = mutableMapOf<String, Any>()
 
-            if(data.qrBool == true){
-                System.out.println("(UrlShortenerController) LLAMANDO A  generateQR")
-                qrQueue.put(Pair(it.hash, url.toString()))
-                System.out.println("(UrlShortenerController) LLAMANDO A getQR():" + url.toString())
-                val qrUrl = linkTo<UrlShortenerControllerImpl> { getQR(it.hash, request) }.toUri()
-                properties["qr"] = qrUrl
+                        if(data.qrBool){
+                            System.out.println("(UrlShortenerController) LLAMANDO A  generateQR")
+                            qrQueue.put(Pair(it.hash, url.toString()))
+                            System.out.println("(UrlShortenerController) LLAMANDO A getQR():" + url.toString())
+                            val qrUrl = linkTo<UrlShortenerControllerImpl> { getQR(it.hash, request) }.toUri()
+                            properties["qr"] = qrUrl
+                        }
+
+                        val response = ShortUrlDataOut(
+                            url = url,
+                            properties = properties
+                        )
+                        System.out.println("(UrlShortenerController) response: ShortUrlDataOut:" + response)
+
+                        ResponseEntity<ShortUrlDataOut>(response, h, HttpStatus.CREATED)
+                    }
+                }
             }
+            result.await()
+    }
 
-            val response = ShortUrlDataOut(
-                url = url,
-                properties = properties
-            )
-            System.out.println("(UrlShortenerController) response: ShortUrlDataOut:" + response)
-
-            ResponseEntity<ShortUrlDataOut>(response, h, HttpStatus.CREATED)
-        }
 
     @PostMapping("/api/bulk", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE]) 
     override fun csvHandler(data: CsvDataIn, request: HttpServletRequest): ResponseEntity<CsvDataOut> =
