@@ -3,8 +3,6 @@
 package es.unizar.urlshortener.core.usecases
 
 import es.unizar.urlshortener.core.*
-import kotlin.math.log
-
 /**
  * Given an url returns the key that is used to create a short URL.
  * When the url is created optional data may be added.
@@ -83,9 +81,10 @@ class CreateShortUrlUseCaseImpl(
                 }?: run{
                     //System.out.println("(CreateShortUrlUseCase) data: ShortUrlProperties:" + data)
                     val hash : String = if(data.alias != "" ){
-                        //System.out.println("AÑADIDO ALAISSSS" + data)
+                        System.out.println("AÑADIDO ALIASSSS" + data.alias)
                         data.alias
                     }else{
+                        System.out.println("AÑADIDO HASHHHHHH")
                         hashService.hasUrl(url)
                     }
                     val su = ShortUrl(

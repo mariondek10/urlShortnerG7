@@ -2,6 +2,7 @@
 
 package es.unizar.urlshortener.infrastructure.delivery
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import es.unizar.urlshortener.core.*
 
 import es.unizar.urlshortener.core.usecases.*
@@ -20,6 +21,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MultiValueMap
 import java.util.concurrent.BlockingQueue
 
 @WebMvcTest
@@ -176,6 +179,38 @@ class UrlShortenerControllerTest {
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
         )
             .andExpect(status().isBadRequest)
+    }
+
+
+    @Test
+    fun `returnInfoShortUrl returns information if short url has been clicked`() {
+
+        val userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/11.0.696.68 Safari/535.19"
+        val data: MutableMap<String, Int> = mutableMapOf()
+        data["Mac OS X - Chrome 11"] = 1
+
+        given(redirectUseCase.redirectTo("key")).willReturn(Redirection("http://example.com/"))
+        given(identifyInfoClientUseCase.returnInfoShortUrl("key")).willReturn(data)
+
+        mockMvc.perform(get("/{id}", "key")
+            .header("User-Agent", userAgent))
+            .andExpect(status().isTemporaryRedirect)
+            .andExpect(redirectedUrl("http://example.com/"))
+
+        mockMvc.perform(get("/api/link/{id}", "key"))
+            .andExpect(status().isOk)
+            .andExpect(content().json(jacksonObjectMapper().writeValueAsString(data)))
+    }
+
+    @Test
+    fun `redirectTo doesn't return a 4xx error if there are no headers`() {
+        given(redirectUseCase.redirectTo("key")).willReturn(Redirection("http://example.com/"))
+
+        // Si envio cabeceras vacias no genera ningun error de usuario
+        mockMvc.perform(get("/{id}", "key"))
+            .andExpect(status().isTemporaryRedirect)
+            .andExpect(redirectedUrl("http://example.com/"))
+
     }
 
     @Test

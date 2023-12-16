@@ -1,6 +1,6 @@
 $(document).ready(
     function () {
-
+        var url = null
         /**
          * 1. Interceptamos el evento submit del formulario
          * 2. Prevenimos que se envíe el formulario
@@ -9,34 +9,31 @@ $(document).ready(
          * 5. Si la petición es correcta, mostramos el resultado
          * 6. Si la petición falla, mostramos el error
          */
+        $("#ver_info").prop('disabled', true)
 
         $("#shortener").submit(
             function (event) {
                 event.preventDefault();
 
-                let alias = document.getElementById('inputAlias').value;
-                console.log("alias:", alias)
+                let alias_ = document.getElementById('inputAlias').value;
+                console.log("alias:", alias_)
                             
                 let isQRChecked = $("#QRcheckbox").prop("checked");
                 console.log("isQRChecked:", isQRChecked)
 
                 console.log("url:", $("#url").val())
 
-                const data = {
-                    url: $("#url").val(),
-                    qrBool: isQRChecked,
-                };
-
-                if (alias.trim() === null) {
-                    data.alias = "";
-                }
                 $.ajax({
                     type: "POST",
                     url: "/api/link",
-                    data: data,
-                    success: async function (data, status, request) {
+                    data: {
+                        url: $("#url").val(),
+                        qrBool: isQRChecked,
+                        alias: alias_
+                    },
+                    success: async function (data, request) {
                         console.log("APP.js data recibida:", data)
-
+                        url = data.url
                         if(data.properties.qr){
 
                             $("#result").html(
@@ -70,4 +67,39 @@ $(document).ready(
                     }
                 });
             });
+
+        $("#ver_info").click(
+            function(event) {
+                const hash = url.substring(url.lastIndexOf('/') + 1);
+                $.ajax({
+                    type: "GET",
+                    url: '/api/link/' + hash,
+                    success: function (msg, status, request) {
+                        try {
+                            if (msg) {
+                                $('#tabla_info_clicks').empty();
+
+                                $('#tabla_info_clicks').append(
+                                    '<tr>' +
+                                    '<th>Origin</th>' +
+                                    '<th>Clicks</th>' +
+                                    '</tr>'
+                                );
+
+                                Object.keys(msg).forEach(key => {
+                                    const fila = '<tr><td>' + key + '</td><td>' + msg[key] + '</td></tr>';
+                                    $('#tabla_info_clicks').append(fila);
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Error en el manejo de la respuesta AJAX:', error);
+                        }
+                    }
+                });
+        });
+
+
+        $("#result").on("click", "a", function() {
+            $("#ver_info").prop('disabled', false);
+        });
     });

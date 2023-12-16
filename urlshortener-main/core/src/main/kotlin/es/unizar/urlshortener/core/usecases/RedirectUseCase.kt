@@ -19,20 +19,12 @@ interface RedirectUseCase {
  * Implementation of [RedirectUseCase].
  */
 class RedirectUseCaseImpl(
-    private val shortUrlRepository: ShortUrlRepositoryService,
-    private val isReachableUseCase: IsReachableUseCase
+    private val shortUrlRepository: ShortUrlRepositoryService
 ) : RedirectUseCase {
 
     override fun redirectTo(key: String) = shortUrlRepository
         .findByKey(key)
-        ?.let {
-            when {
-                !isReachableUseCase.isReachable(it.redirection.target) ->
-                    throw UrlRegisteredButNotReachable(key)
-
-                else -> it.redirection
-            }
-        }
+        ?.redirection
         ?: throw RedirectionNotFound(key)
 }
 

@@ -40,7 +40,7 @@ class ApplicationConfiguration(
     fun hashService() = HashServiceImpl()
 
     @Bean
-    fun redirectUseCase() = RedirectUseCaseImpl(shortUrlRepositoryService(), isReachableUseCase())
+    fun redirectUseCase() = RedirectUseCaseImpl(shortUrlRepositoryService())
 
     @Bean
     fun logClickUseCase() = LogClickUseCaseImpl(clickRepositoryService())

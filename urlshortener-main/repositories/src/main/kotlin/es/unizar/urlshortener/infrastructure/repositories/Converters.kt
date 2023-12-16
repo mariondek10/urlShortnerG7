@@ -23,6 +23,7 @@ fun ClickEntity.toDomain() = Click(
  * Extension method to convert a domain [Click] into a [ClickEntity].
  */
 fun Click.toEntity() = ClickEntity(
+    id = null,
     hash = hash,
     created = created,
     ip = properties.ip,
