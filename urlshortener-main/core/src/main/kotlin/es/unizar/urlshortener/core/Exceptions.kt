@@ -15,6 +15,6 @@ class UrlRegisteredButNotReachable(key: String) : Exception("[$key] The Uri you'
  */
 class KeyAlreadyExists(key: String) : Exception("[$key] already exists")
 
-class AliasAlreadyExists(alias: String) : Exception("[$alias] already exists")
+class AliasAlreadyExists(key: String) : Exception("[$key] this alias already exists")
 
-class AliasContainsSlash(alias: String) : Exception("[$alias] contains a slash")
+class AliasContainsSlash(key: String) : Exception("[$key] this alias contains a slash")

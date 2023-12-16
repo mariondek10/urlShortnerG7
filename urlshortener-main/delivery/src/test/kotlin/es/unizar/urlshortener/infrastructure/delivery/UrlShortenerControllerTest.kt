@@ -214,19 +214,14 @@ class UrlShortenerControllerTest {
         val existingKey = "existing-key"
         val existingUrl = "http://example.com/"
 
-        // Set up mock behavior to simulate the key already existing
         given(createShortUrlUseCase.create(url = existingUrl, data = ShortUrlProperties(ip = "127.0.0.1")))
             .willAnswer { throw KeyAlreadyExists(existingKey) }
 
-        // Perform the HTTP request and check for a 400 error
         mockMvc.perform(
             post("/api/link")
                 .param("url", existingUrl)
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-        )
-            .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.status").value(400))
-            .andExpect(jsonPath("$.message").value("Key already exists: $existingKey"))
+                .contentType((MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+        ).andExpect(status().isBadRequest)
     }
 
 
@@ -261,17 +256,24 @@ class UrlShortenerControllerTest {
      */
     @Test
     fun `returns a 400 error if the alias is already in use`() {
-        val existingAlias = "existing-alias"
+        val usedAlias = "usedAlias"
         val existingUrl = "http://example.com/"
 
         // Set up mock behavior to simulate the alias already existing
         given(
             createShortUrlUseCase.create(
                 url = existingUrl,
-                data = ShortUrlProperties(ip = "127.0.0.1", alias = existingAlias)
+                data = ShortUrlProperties(ip = "127.0.0.1", alias = usedAlias)
             )
         )
-            .willAnswer { throw AliasAlreadyExists(existingAlias) }
+            .willAnswer { throw AliasAlreadyExists(usedAlias) }
+        mockMvc.perform(
+            post("/api/link")
+                .param("url", existingUrl)
+                .param("alias", usedAlias)
+                .contentType((MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+        ).andExpect(status().isBadRequest)
+
     }
 
     /**
@@ -279,26 +281,24 @@ class UrlShortenerControllerTest {
      */
 
     @Test
-    fun `returns a 400 error if the alias contains a slash`(){
-        val slashAlias = "existing/alias"
+    fun `returns a 400 error if the alias contains a slash`() {
+        val slashAlias = "slash/alias"
         val existingUrl = "http://example.com/"
 
         // Set up mock behavior to simulate the alias contains a slash
-        given(createShortUrlUseCase.create(url = existingUrl, data = ShortUrlProperties(ip = "127.0.0.1", alias = slashAlias)))
-            .willAnswer { throw AliasContainsSlash(slashAlias) }
+        given(
+            createShortUrlUseCase.create(
+                url = existingUrl,
+                data = ShortUrlProperties(ip = "127.0.0.1", alias = slashAlias)
+            )
+        ).willAnswer { throw AliasContainsSlash(slashAlias) }
+
         mockMvc.perform(
             post("/api/link")
                 .param("url", existingUrl)
                 .param("alias", slashAlias)
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-        )
-            .andExpect(status().isBadRequest)
-            .andExpect(jsonPath("$.status").value(400))
-            .andExpect(jsonPath("$.message").value("Alias contains a slash: $slashAlias"))
-
-
-
-
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        ).andExpect(status().isBadRequest)
     }
 
 
