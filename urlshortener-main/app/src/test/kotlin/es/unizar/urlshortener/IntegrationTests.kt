@@ -81,8 +81,8 @@ class HttpRequestTest {
         val response = shortUrl("http://example.com/")
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
-        assertThat(response.headers.location).isEqualTo(URI.create("http://localhost:$port/f684a3c4"))
-        assertThat(response.body?.url).isEqualTo(URI.create("http://localhost:$port/f684a3c4"))
+        assertThat(response.headers.location).isEqualTo(URI.create("/f684a3c4"))
+        assertThat(response.body?.url).isEqualTo(URI.create("/f684a3c4"))
         assertThat(response.body?.properties?.get("qr")).isNull()
 
         assertThat(JdbcTestUtils.countRowsInTable(jdbcTemplate, "shorturl")).isEqualTo(1)
@@ -94,9 +94,9 @@ class HttpRequestTest {
         val response = shortUrlQR("http://example.com/")
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
-        assertThat(response.headers.location).isEqualTo(URI.create("http://localhost:$port/f684a3c4"))
-        assertThat(response.body?.url).isEqualTo(URI.create("http://localhost:$port/f684a3c4"))
-        assertThat(response.body?.properties?.get("qr")).isEqualTo("http://localhost:$port/f684a3c4/qr")
+        assertThat(response.headers.location).isEqualTo(URI.create("/f684a3c4"))
+        assertThat(response.body?.url).isEqualTo(URI.create("/f684a3c4"))
+        assertThat(response.body?.properties?.get("qr")).isEqualTo("/f684a3c4/qr")
 
         assertThat(JdbcTestUtils.countRowsInTable(jdbcTemplate, "shorturl")).isEqualTo(1)
         assertThat(JdbcTestUtils.countRowsInTable(jdbcTemplate, "click")).isEqualTo(0)

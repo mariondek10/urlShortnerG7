@@ -104,8 +104,8 @@ class UrlShortenerControllerTest {
         )
             .andDo(print())
             .andExpect(status().isCreated)
-            .andExpect(redirectedUrl("http://localhost/f684a3c4"))
-            .andExpect(jsonPath("$.url").value("http://localhost/f684a3c4"))
+            .andExpect(redirectedUrl("/f684a3c4"))
+            .andExpect(jsonPath("$.url").value("/f684a3c4"))
     }
 
     @Test
@@ -125,9 +125,9 @@ class UrlShortenerControllerTest {
         )
             .andDo(print())
             .andExpect(status().isCreated)
-            .andExpect(redirectedUrl("http://localhost/f684a3c4"))
-            .andExpect(jsonPath("$.url").value("http://localhost/f684a3c4"))
-            .andExpect(jsonPath("$.properties.qr").value("http://localhost/f684a3c4/qr"))
+            .andExpect(redirectedUrl("/f684a3c4"))
+            .andExpect(jsonPath("$.url").value("/f684a3c4"))
+            .andExpect(jsonPath("$.properties.qr").value("/f684a3c4/qr"))
     }
 
     @Test
@@ -282,8 +282,8 @@ class UrlShortenerControllerTest {
         )
             .andDo(print())
             .andExpect(status().isCreated)
-            .andExpect(redirectedUrl("http://localhost/alias"))
-            .andExpect(jsonPath("$.url").value("http://localhost/alias"))
+            .andExpect(redirectedUrl("/alias"))
+            .andExpect(jsonPath("$.url").value("/alias"))
 
     }
 

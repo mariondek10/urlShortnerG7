@@ -7,6 +7,8 @@ import eu.bitwalker.useragentutils.UserAgent
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.hateoas.server.mvc.linkTo
+import org.springframework.hateoas.server.reactive.WebFluxLinkBuilder
+import org.springframework.hateoas.server.core.LinkBuilderSupport
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -160,6 +162,12 @@ class UrlShortenerControllerImpl(
                         System.out.println("(UrlShortenerController) shortURL creada:" + it)
 
                         val h = HttpHeaders()
+                        /* INTENTO DE USAR WebFluxLinkBuilder
+
+                        val url = WebFluxLinkBuilder.linkTo(
+                                WebFluxLinkBuilder.methodOn(UrlShortenerController::class.java).redirectTo(it.hash, request)
+                        ).toUri()
+                        */
                         val url = linkTo<UrlShortenerControllerImpl> { redirectTo(it.hash, request) }.toUri()
                         h.location = url
 
@@ -170,6 +178,13 @@ class UrlShortenerControllerImpl(
                             System.out.println("(UrlShortenerController) LLAMANDO A  generateQR")
                             qrQueue.put(Pair(it.hash, url.toString()))
                             System.out.println("(UrlShortenerController) LLAMANDO A getQR():" + url.toString())
+                            /* INTENTO DE USAR WebFluxLinkBuilder
+
+                            val qrUrl = WebFluxLinkBuilder.linkTo(
+                                WebFluxLinkBuilder.methodOn(UrlShortenerController::class.java).getQR(shortUrl.hash, request)
+                            ).toUriComponentsBuilder()
+
+                            */
                             val qrUrl = linkTo<UrlShortenerControllerImpl> { getQR(it.hash, request) }.toUri()
                             properties["qr"] = qrUrl
                         }
