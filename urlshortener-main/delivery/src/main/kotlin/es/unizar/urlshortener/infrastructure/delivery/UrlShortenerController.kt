@@ -1,3 +1,5 @@
+@file:Suppress("LongParameterList", "WildcardImport")
+
 package es.unizar.urlshortener.infrastructure.delivery
 
 import es.unizar.urlshortener.core.ClickProperties
@@ -106,6 +108,7 @@ data class CsvDataOut(
  *
  * **Note**: Spring Boot is able to discover this [RestController] without further configuration.
  */
+
 @RestController
 class UrlShortenerControllerImpl(
     val redirectUseCase: RedirectUseCase,
@@ -132,10 +135,12 @@ class UrlShortenerControllerImpl(
                     async(Dispatchers.IO){
                         redirectUseCase.redirectTo(id).let {
                             val header = request.getHeader("User-Agent")
-                            val userAgent = header?.let { it -> UserAgent.parseUserAgentString(it) }
+                            val userAgent = header?.let { userAgentHeader ->
+                                UserAgent.parseUserAgentString(userAgentHeader) }
                             val browser = userAgent?.browser?.getName()
                             val platform = userAgent?.operatingSystem?.getName()
-                            logClickUseCase.logClick(id, ClickProperties(ip = request.remoteAddr, browser = browser, platform = platform))
+                            logClickUseCase.logClick(id, ClickProperties(ip = request.remoteAddr, browser = browser,
+                                    platform = platform))
                             val h = HttpHeaders()
                             h.location = URI.create(it.target)
                             ResponseEntity<Unit>(h, HttpStatus.valueOf(it.mode))
@@ -146,7 +151,8 @@ class UrlShortenerControllerImpl(
     }
 
     @PostMapping("/api/link", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
-    override fun shortener(data: ShortUrlDataIn, request: HttpServletRequest): ResponseEntity<ShortUrlDataOut> = runBlocking {
+    override fun shortener(data: ShortUrlDataIn, request: HttpServletRequest): ResponseEntity<ShortUrlDataOut> =
+            runBlocking {
             val result = coroutineScope {
                 async(Dispatchers.IO){
                     createShortUrlUseCase.create(
@@ -165,7 +171,8 @@ class UrlShortenerControllerImpl(
                         /* INTENTO DE USAR WebFluxLinkBuilder
 
                         val url = WebFluxLinkBuilder.linkTo(
-                                WebFluxLinkBuilder.methodOn(UrlShortenerController::class.java).redirectTo(it.hash, request)
+                                WebFluxLinkBuilder.methodOn(UrlShortenerController::class.java).redirectTo(it.hash,
+                                    request)
                         ).toUri()
                         */
                         val url = linkTo<UrlShortenerControllerImpl> { redirectTo(it.hash, request) }.toUri()
@@ -181,7 +188,8 @@ class UrlShortenerControllerImpl(
                             /* INTENTO DE USAR WebFluxLinkBuilder
 
                             val qrUrl = WebFluxLinkBuilder.linkTo(
-                                WebFluxLinkBuilder.methodOn(UrlShortenerController::class.java).getQR(shortUrl.hash, request)
+                                WebFluxLinkBuilder.methodOn(UrlShortenerController::class.java).getQR(shortUrl.hash,
+                                    request)
                             ).toUriComponentsBuilder()
 
                             */

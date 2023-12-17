@@ -59,7 +59,7 @@ class ApplicationConfiguration(
         CreateShortUrlUseCaseImpl(shortUrlRepositoryService(), isReachableUseCase(),validatorService(), hashService())
     
     @Bean
-    fun csvUseCase() = CsvUseCaseImpl(0)
+    fun csvUseCase() = CsvUseCaseImpl()
 
     @Bean
     fun identifyInfoClientUseCase() = IdentifyInfoClientUseCaseImpl(clickRepositoryService())

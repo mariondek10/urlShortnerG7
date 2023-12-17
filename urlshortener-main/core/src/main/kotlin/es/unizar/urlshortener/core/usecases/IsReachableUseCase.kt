@@ -1,4 +1,4 @@
-@file:Suppress("WildcardImport")
+@file:Suppress("WildcardImport", "TooGenericExceptionCaught", "MagicNumber")
 
 package es.unizar.urlshortener.core.usecases
 
@@ -33,12 +33,13 @@ class IsReachableUseCaseImpl
      * @return Boolean indicating if the URL is reachable
      */
     override fun isReachable(url: String): Boolean {
+        var isConnected = false
         var attempts = 0
         val maxAttempts = 3
         val delayMillis = 1000L
 
 
-        while (attempts < maxAttempts) {
+        while (attempts < maxAttempts && !isConnected) {
             try {
                 val connection = URL(url).openConnection() as HttpURLConnection
                 connection.requestMethod = "GET"
@@ -47,17 +48,17 @@ class IsReachableUseCaseImpl
                 val responseCode = connection.responseCode
 
                 if (responseCode in 200..299) {
-                    return true
+                    isConnected = true
                 } else {
                     Thread.sleep(delayMillis)
                     attempts++
                 }
             } catch (e: Exception) {
                 println(e)
-                return false
+                attempts ++
             }
         }
-        return false
+        return isConnected
     }
 }
 

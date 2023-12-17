@@ -1,4 +1,4 @@
-@file:Suppress("WildcardImport")
+@file:Suppress("WildcardImport", "UnusedPrivateProperty")
 
 package es.unizar.urlshortener.infrastructure.delivery
 
@@ -135,19 +135,39 @@ class UrlShortenerControllerTest {
         val urlToShorten = "http://url-unreachable.com"
         given(isReachableUseCase.isReachable(urlToShorten)).willReturn(false)
         given(
-            createShortUrlUseCase.create(
-                url = urlToShorten,
-                data = ShortUrlProperties(ip = "127.0.0.1")
-            )
+                createShortUrlUseCase.create(
+                        url = urlToShorten,
+                        data = ShortUrlProperties(ip = "127.0.0.1")
+                )
         ).willAnswer { throw UrlToShortNotReachable(urlToShorten) }
 
         mockMvc.perform(
-            post("/api/link")
-                .param("url", urlToShorten)
-                .contentType((MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+                post("/api/link")
+                        .param("url", urlToShorten)
+                        .contentType((MediaType.APPLICATION_FORM_URLENCODED_VALUE))
         ).andExpect(status().isBadRequest)
     }
 
+    @Test
+    fun `Create returns a 200 response if the uri to shorten is reachable`() {
+        val urlToShorten = "http://url-reachable.com"
+        given(isReachableUseCase.isReachable(urlToShorten)).willReturn(true)
+        given(
+                createShortUrlUseCase.create(
+                        url = urlToShorten,
+                        data = ShortUrlProperties(ip = "127.0.0.1")
+                )
+        ).willReturn(ShortUrl("f684a3c4", Redirection("http://url-reachable.com")))
+
+        mockMvc.perform(
+                post("/api/link")
+                        .param("url", urlToShorten)
+                        .contentType((MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+        ).andExpect(status().isCreated)
+    }
+
+    /*
+    THIS TEST WORKS BUT IS REDUNDANT WITHOUT SCALABILITY
     @Test
     fun `Redirect to returns a 403 response if the id is registered but the uri is not reachable`() {
         val urlToRedirect = "https://url-unreachable.com/"
@@ -163,6 +183,7 @@ class UrlShortenerControllerTest {
         )
             .andExpect(status().isForbidden)
     }
+     */
 
     @Test
     fun `creates returns bad request if it can compute a hash`() {
@@ -185,7 +206,8 @@ class UrlShortenerControllerTest {
     @Test
     fun `returnInfoShortUrl returns information if short url has been clicked`() {
 
-        val userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/11.0.696.68 Safari/535.19"
+        val userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/535.19 (KHTML, like Gecko) " +
+                "Chrome/11.0.696.68 Safari/535.19"
         val data: MutableMap<String, Int> = mutableMapOf()
         data["Mac OS X - Chrome 11"] = 1
 

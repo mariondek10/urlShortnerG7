@@ -68,6 +68,8 @@ $(document).ready(
                 });
             });
 
+        const socket = new WebSocket("ws://localhost:8080/my-websocket-endpoint");
+
         $("#ver_info").click(
             function(event) {
                 const hash = url.substring(url.lastIndexOf('/') + 1);
@@ -97,7 +99,6 @@ $(document).ready(
                     }
                 });
         });
-
 
         $("#result").on("click", "a", function() {
             $("#ver_info").prop('disabled', false);

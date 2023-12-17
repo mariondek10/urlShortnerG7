@@ -1,4 +1,4 @@
-@file:Suppress("WildcardImport")
+@file:Suppress("WildcardImport", "MagicNumber", "EmptyDefaultConstructor", "TooGenericExceptionCaught", "ReturnCount")
 
 package es.unizar.urlshortener.core.usecases
 import es.unizar.urlshortener.core.*
@@ -17,10 +17,12 @@ import java.io.File
 
 // Testing purposes only! 
 fun main() {
-    val convertCsvUseCase = CsvUseCaseImpl(1)
+    val convertCsvUseCase = CsvUseCaseImpl()
 
     // Example CSV data
-    val csvData = "https://www.example.com/blog/how-to-create-a-website;;https://github.com/;https://github.com/\nhttps://www.youtube.com/;https://github.com/;https://github.com/;\nhttps://github.com/;;;\nhttps://github.com/;;;\nhttps://github.com/;;;\nhttps://github.com/;;;"
+    val csvData = "https://www.example.com/blog/how-to-create-a-website;;https://github.com/;https://github.com/\n" +
+            "https://www.youtube.com/;https://github.com/;https://github.com/;\nhttps://github.com/;;;" +
+            "\nhttps://github.com/;;;\nhttps://github.com/;;;\nhttps://github.com/;;;"
 
     val modifiedCsvData = convertCsvUseCase.convert(csvData)
 
@@ -44,7 +46,7 @@ interface CsvUseCase {
  */
 class CsvUseCaseImpl(
     // We need a numeric parameter to work as a selector
-    private val temp: Int
+    //private val temp: Int
 ) : CsvUseCase {
     override fun convert(csvData: String): String {
         // Case 1: empty csvData
@@ -101,7 +103,8 @@ class CsvUseCaseImpl(
     }
 
 
-    private fun shortenUri(originalUri: String, customWord: String, isQr: String): String { // Modify it so it use ajax or it's gonna be a mess (use kotlin/js)
+    private fun shortenUri(originalUri: String, customWord: String, isQr: String): String {
+        // Modify it so it use ajax or it's gonna be a mess (use kotlin/js)
         val apiUrl = "http://localhost:8080/api/link" 
         
         var newUrl = ""
@@ -113,7 +116,8 @@ class CsvUseCaseImpl(
         connection.doOutput = true
 
         // Prepare the data for the API request
-        val postData = "url=${URLEncoder.encode(originalUri, "UTF-8")}&alias=${URLEncoder.encode(customWord, "UTF-8")}&qrBool=${URLEncoder.encode(isQr, "UTF-8")}"
+        val postData = "url=${URLEncoder.encode(originalUri, "UTF-8")}&alias=${URLEncoder.encode(customWord,
+                "UTF-8")}&qrBool=${URLEncoder.encode(isQr, "UTF-8")}"
         val input = postData.toByteArray(Charsets.UTF_8)
 
         // Send the data in the body of the request
