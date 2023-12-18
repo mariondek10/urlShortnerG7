@@ -65,7 +65,7 @@ class IsReachableUseCaseImpl (
             println("Actualizo el estado con valor 1")
         } else {
             shortUrlRepository.updateReachabilityCode(hash, 0)
-            println("Actualizo el estado con valor 2")
+            println("Actualizo el estado con valor 0")
         }
         return isConnected
     }

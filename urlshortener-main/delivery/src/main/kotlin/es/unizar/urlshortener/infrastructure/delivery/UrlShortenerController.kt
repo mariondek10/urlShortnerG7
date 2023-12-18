@@ -4,6 +4,7 @@ package es.unizar.urlshortener.infrastructure.delivery
 
 import es.unizar.urlshortener.core.ClickProperties
 import es.unizar.urlshortener.core.ShortUrlProperties
+//import es.unizar.urlshortener.core.blockingQueues.ReachabilityQueue
 import es.unizar.urlshortener.core.usecases.*
 import eu.bitwalker.useragentutils.UserAgent
 import jakarta.servlet.http.HttpServletRequest
@@ -23,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.net.URI
 import java.util.concurrent.BlockingQueue
 import kotlinx.coroutines.*
-
+import org.springframework.beans.factory.annotation.Qualifier
 
 
 /**
@@ -117,7 +118,7 @@ class UrlShortenerControllerImpl(
     val csvUseCase: CsvUseCase,
     val qrUseCase: QRUseCase,
     val qrQueue: BlockingQueue<Pair<String, String>>,
-    val reachableQueue: BlockingQueue<Pair<String, String>>,
+    @Qualifier("reachabilityQueue") val reachableQueue: BlockingQueue<Pair<String,String>>,
     val identifyInfoClientUseCase: IdentifyInfoClientUseCase
 
 ) : UrlShortenerController {
@@ -174,8 +175,7 @@ class UrlShortenerControllerImpl(
                         } else {
                             it.properties.alias
                         }
-                        val pair = Pair(data.url,value)
-                        reachableQueue.put(pair)
+                        reachableQueue.put(Pair(data.url, value))
 
                         val h = HttpHeaders()
                         val url = linkTo<UrlShortenerControllerImpl> { redirectTo(it.hash, request) }.toUri()

@@ -1,9 +1,7 @@
+@file:Suppress("WildcardImport")
 package es.unizar.urlshortener.core.usecases
 
-import es.unizar.urlshortener.core.Redirection
-import es.unizar.urlshortener.core.RedirectionNotFound
-import es.unizar.urlshortener.core.ShortUrlRepositoryService
-import es.unizar.urlshortener.core.UrlRegisteredButNotReachable
+import es.unizar.urlshortener.core.*
 
 /**
  * Given a key returns a [Redirection] that contains a [URI target][Redirection.target]
@@ -22,9 +20,27 @@ class RedirectUseCaseImpl(
     private val shortUrlRepository: ShortUrlRepositoryService
 ) : RedirectUseCase {
 
-    override fun redirectTo(key: String) = shortUrlRepository
+    /*
+        override fun redirectTo(key: String) = shortUrlRepository
         .findByKey(key)
         ?.redirection
         ?: throw RedirectionNotFound(key)
+
+     */
+
+    override fun redirectTo(key: String): Redirection {
+       val shortUrl = shortUrlRepository.findByKey(key)
+        if (shortUrl != null){
+            val code = shortUrlRepository.findReachabilityCodeByKey(key)
+            println("Codigo de alcanzabilidad redirectUseCase" + code)
+            when (code) {
+                0 -> throw UrlRegisteredButNotReachable(key)
+                2 -> throw ReachabilityNotChecked(key)
+                else -> return shortUrl.redirection
+            }
+        } else {
+            throw RedirectionNotFound(key)
+        }
+    }
 }
 

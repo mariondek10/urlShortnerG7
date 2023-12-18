@@ -11,7 +11,7 @@ import es.unizar.urlshortener.core.*
  * **Note**: This is an example of functionality.
  */
 interface CreateShortUrlUseCase {
-    fun create(url: String, data: ShortUrlProperties): ShortUrl
+    fun     create(url: String, data: ShortUrlProperties): ShortUrl
 }
 
 /**
@@ -87,6 +87,7 @@ class CreateShortUrlUseCaseImpl(
                                     qrBool = data.qrBool
                             )
                     )
+                    println("(CREATEUSECASE) reachailityStatus:" + su.properties.reachabilityStatus)
                     //System.out.println("(CreateShortUrlUseCase) antes de save su: ShortUrl:" + su)
                     if(shortUrlRepository.findByKey(hash) == null){
                         shortUrlRepository.save(su)

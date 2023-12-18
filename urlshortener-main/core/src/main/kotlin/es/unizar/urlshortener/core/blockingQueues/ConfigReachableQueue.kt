@@ -1,5 +1,5 @@
 package es.unizar.urlshortener.core.blockingQueues
-
+/*
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.annotation.EnableAsync
@@ -18,7 +18,7 @@ private const val QUEUE_CAPACITY = 100
 @EnableAsync
 @EnableScheduling
 open class ConfigReachableQueue {
-    @Bean("ReachableQueue")
+    @Bean("configQueue")
     open fun executor(): Executor {
         val executor = ThreadPoolTaskExecutor()
         executor.maxPoolSize = POOL_SIZE // Set the maximum pool size
@@ -27,4 +27,4 @@ open class ConfigReachableQueue {
         executor.initialize()
         return executor
     }
-}
+}*/

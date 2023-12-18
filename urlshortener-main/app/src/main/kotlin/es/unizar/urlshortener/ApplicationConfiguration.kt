@@ -9,6 +9,7 @@ import es.unizar.urlshortener.infrastructure.repositories.ClickRepositoryService
 import es.unizar.urlshortener.infrastructure.repositories.ShortUrlEntityRepository
 import es.unizar.urlshortener.infrastructure.repositories.ShortUrlRepositoryServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.util.*
@@ -21,7 +22,7 @@ import kotlin.collections.HashMap
  *
  * **Note**: Spring Boot is able to discover this [Configuration] without further configuration.
  */
-@Suppress("TooManyFunctions") //Para que no de error el detekt
+@Suppress("TooManyFunctions",  "MagicNumber") //Para que no de error el detekt
 @Configuration
 class ApplicationConfiguration(
     @Autowired val shortUrlEntityRepository: ShortUrlEntityRepository,
@@ -65,6 +66,13 @@ class ApplicationConfiguration(
     fun identifyInfoClientUseCase() = IdentifyInfoClientUseCaseImpl(clickRepositoryService())
 
     @Bean
-    fun qrQueue(): BlockingQueue<Pair<String, String>> = LinkedBlockingQueue()
+    @Qualifier("reachabilityQueue")
+    fun reachableQueue(): BlockingQueue<Pair<String,String>> = LinkedBlockingQueue(100)
+
+    @Bean
+    @Qualifier("qrQueue")
+    fun qrQueue(): BlockingQueue<Pair<String, String>> = LinkedBlockingQueue(100)
+
+
 
 }
