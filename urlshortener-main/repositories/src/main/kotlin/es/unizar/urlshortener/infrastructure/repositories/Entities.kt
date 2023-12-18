@@ -44,5 +44,6 @@ class ShortUrlEntity(
     val safe: Boolean,
     val ip: String?,
     val country: String?,
-    val qrBool: Boolean?
+    val qrBool: Boolean?,
+    var reachabilityStatus: Int // 0 if !reachable, 1 if rechable, 2 if not checked yet
 )

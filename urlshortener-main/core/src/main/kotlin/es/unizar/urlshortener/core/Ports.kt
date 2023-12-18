@@ -16,6 +16,7 @@ interface ShortUrlRepositoryService {
     fun findByKey(id: String): ShortUrl?
     fun save(su: ShortUrl): ShortUrl
     fun delete(su: ShortUrl): Boolean
+    fun updateReachabilityCode(hash: String, newCode: Int): Unit
 }
 
 

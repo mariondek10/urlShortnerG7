@@ -52,11 +52,11 @@ class ApplicationConfiguration(
     fun qRUseCase() = QRUseCaseImpl(shortUrlRepositoryService(), qrMap())
 
     @Bean
-    fun isReachableUseCase() = IsReachableUseCaseImpl()
+    fun isReachableUseCase() = IsReachableUseCaseImpl(shortUrlRepositoryService())
 
     @Bean
     fun createShortUrlUseCase() =
-        CreateShortUrlUseCaseImpl(shortUrlRepositoryService(), isReachableUseCase(),validatorService(), hashService())
+        CreateShortUrlUseCaseImpl(shortUrlRepositoryService(),validatorService(), hashService())
     
     @Bean
     fun csvUseCase() = CsvUseCaseImpl()

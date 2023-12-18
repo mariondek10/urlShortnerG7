@@ -2,6 +2,7 @@
 
 package es.unizar.urlshortener.core.usecases
 
+import es.unizar.urlshortener.core.ShortUrlRepositoryService
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -18,21 +19,22 @@ interface IsReachableUseCase {
      * @param url The URL to check for reachability
      * @return Boolean indicating if the URL is reachable
      */
-    fun isReachable(url: String): Boolean
+    fun isReachable(url: String, hash: String): Boolean
 }
 
 /**
  * Implementation of IsReachableUseCase interface.
  */
-class IsReachableUseCaseImpl
-    : IsReachableUseCase {
+class IsReachableUseCaseImpl (
+    private val shortUrlRepository: ShortUrlRepositoryService
+) : IsReachableUseCase {
 
     /**
      * Checks if the provided URL is reachable by making a GET request and verifying the response code.
      * @param url The URL to check for reachability
      * @return Boolean indicating if the URL is reachable
      */
-    override fun isReachable(url: String): Boolean {
+    override fun isReachable(url: String, hash: String): Boolean {
         var isConnected = false
         var attempts = 0
         val maxAttempts = 3
@@ -55,11 +57,19 @@ class IsReachableUseCaseImpl
                 }
             } catch (e: Exception) {
                 println(e)
-                attempts ++
+                attempts++
             }
+        }
+        if (isConnected) {
+            shortUrlRepository.updateReachabilityCode(hash, 1)
+            println("Actualizo el estado con valor 1")
+        } else {
+            shortUrlRepository.updateReachabilityCode(hash, 0)
+            println("Actualizo el estado con valor 2")
         }
         return isConnected
     }
 }
+
 
 

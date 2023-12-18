@@ -28,6 +28,14 @@ class ShortUrlRepositoryServiceImpl(
 
     override fun save(su: ShortUrl): ShortUrl = shortUrlEntityRepository.save(su.toEntity()).toDomain()
 
+    override fun updateReachabilityCode (hash: String, newReachabilityStatusCode: Int) : Unit {
+        val existingKey = shortUrlEntityRepository.findByHash(hash)
+        if (existingKey != null) {
+            existingKey.reachabilityStatus = newReachabilityStatusCode
+            shortUrlEntityRepository.save(existingKey).toDomain()
+        }
+    }
+
     override fun delete(su: ShortUrl): Boolean {
         val deletedEntity = shortUrlEntityRepository.delete(su.toEntity())
         return deletedEntity != null

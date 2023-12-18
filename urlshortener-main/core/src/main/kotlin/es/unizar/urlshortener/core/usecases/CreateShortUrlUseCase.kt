@@ -3,6 +3,7 @@
 package es.unizar.urlshortener.core.usecases
 
 import es.unizar.urlshortener.core.*
+
 /**
  * Given an url returns the key that is used to create a short URL.
  * When the url is created optional data may be added.
@@ -18,7 +19,6 @@ interface CreateShortUrlUseCase {
  */
 class CreateShortUrlUseCaseImpl(
     private val shortUrlRepository: ShortUrlRepositoryService,
-    private val isReachableUseCase: IsReachableUseCase,
     private val validatorService: ValidatorService,
     private val hashService: HashService
 ) : CreateShortUrlUseCase {
@@ -35,7 +35,7 @@ class CreateShortUrlUseCaseImpl(
      */
     override fun create(url: String, data: ShortUrlProperties): ShortUrl = when {
             !validatorService.isValid(url) -> throw InvalidUrlException(url)
-            !isReachableUseCase.isReachable(url) -> throw UrlToShortNotReachable(url)
+           //  !isReachableUseCase.isReachable(url) -> throw UrlToShortNotReachable(url)
             !validatorService.withoutSlash(data.alias) -> throw InvalidUrlException(url)
             else -> {
                 shortUrlRepository.findByKey(hashService.hasUrl(url))?.let { shortUrl ->
@@ -60,21 +60,11 @@ class CreateShortUrlUseCaseImpl(
                                 qrBool = data.qrBool
                             )
                         )
-                        /*System.out.println("BORRANDOOOOOO")
-                        //borramos la que habia
-                        if (shortUrlRepository.delete(shortUrl)){
-                            System.out.println("es trueeeeee")
-                            //guardamos la nueva
-
-                        }else{
-                            su
-                        }*/
                         if(shortUrlRepository.findByKey(hash) == null){
                             shortUrlRepository.save(su)
                         } else{
                             throw KeyAlreadyExists(hash)
                         }
-
                     } else {
                         shortUrl
                     }
