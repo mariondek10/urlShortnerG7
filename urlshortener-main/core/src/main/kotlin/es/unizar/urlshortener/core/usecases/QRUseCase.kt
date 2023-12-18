@@ -12,6 +12,7 @@ import io.github.g0dkar.qrcode.QRCode
  * Given a URI saves a QR code that links to the resource passed.
  */
 interface QRUseCase {
+
     /**
      * @brief Generate the QR for the shortened URL, if it is required
      *
@@ -34,7 +35,9 @@ interface QRUseCase {
  */
 class QRUseCaseImpl(
     private val shortUrlRepository: ShortUrlRepositoryService,
-    private val qrMap: HashMap<String, ByteArray>
+    private val qrMap: HashMap<String, ByteArray>,
+    private val renderSize : Int = 25
+
 ) : QRUseCase {
 
     override fun generateQR(id: String, url: String) {
@@ -43,7 +46,7 @@ class QRUseCaseImpl(
                 //System.out.println("(QRUSECASE) CREANDO QR it.properties.qrBool:" + it.properties.qrBool)
                 val image = ByteArrayOutputStream()
                 //System.out.println("(QRUSECASE) IMAGE CREADA")
-                var qr = QRCode(url).render(25)
+                var qr = QRCode(url).render(renderSize)
                 //System.out.println("(QRUSECASE) QRCode(url).render(10)")
                 qr.writeImage(image)
                 //System.out.println("(QRUSECASE) qr.writeImage(image)")

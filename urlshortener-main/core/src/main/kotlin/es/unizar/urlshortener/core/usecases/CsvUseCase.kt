@@ -1,31 +1,40 @@
-    @file:Suppress("WildcardImport")
+@file:Suppress("WildcardImport", "MagicNumber", "EmptyDefaultConstructor", "TooGenericExceptionCaught", "ReturnCount")
 
-    package es.unizar.urlshortener.core.usecases
-    import es.unizar.urlshortener.core.*
-    import java.io.BufferedReader
-    import java.io.DataOutputStream
-    import java.io.InputStreamReader
-    import java.net.HttpURLConnection
-    import java.net.URL
-    import java.net.URI
-    import java.net.MalformedURLException
-    import java.io.OutputStream
-    import java.nio.charset.StandardCharsets
-    import java.net.URLEncoder
-    import java.io.File
-    import java.util.concurrent.Callable
-    import java.util.concurrent.Executors
-    import java.util.concurrent.Future
+package es.unizar.urlshortener.core.usecases
+import es.unizar.urlshortener.core.*
+import java.io.BufferedReader
+import java.io.DataOutputStream
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+import java.net.URL
+import java.net.URI
+import java.net.MalformedURLException
+import java.io.OutputStream
+import java.nio.charset.StandardCharsets
+import java.net.URLEncoder
+import java.io.File
 
+/**
+ * Given CSV data (divided by ; specifically), converts it and returns the modified CSV data.
+ *
+ */
+interface CsvUseCase {
+    fun convert(csvData: String): String
+    fun convertFast(csvData: String): String
+}
 
-    /**
-     * Given CSV data (divided by , specifically), converts it and returns the modified CSV data.
-     *
-     */
-    interface CsvUseCase {
-        fun convert(csvData: String): String
-        fun convertFast(csvData: String): String
-    }
+/**
+ * Implementation of [ConvertCsvUseCase].
+ */
+class CsvUseCaseImpl(
+    // We need a numeric parameter to work as a selector
+    //private val temp: Int
+) : CsvUseCase {
+    override fun convert(csvData: String): String {
+        // Case 1: empty csvData
+        if (csvData.isBlank()) {
+            return "ok"
+        }
 
 
     /**
@@ -117,8 +126,6 @@
             // Preparing for future responses
             val convertedUris = mutableListOf<Future<String>>()
 
-
-
             // We use threads to process the rows rapidly
             for (row in rows) {
                 val future: Future<String> = executor.submit(Callable {shortenRow(row)})
@@ -133,7 +140,42 @@
             executor.shutdown()
 
             return csvReturn.toString()
+    }
+
+    private fun shortenUri(originalUri: String, customWord: String, isQr: String): String {
+        // Modify it so it use ajax or it's gonna be a mess (use kotlin/js)
+        val apiUrl = "http://localhost:8080/api/link" 
+        
+        var newUrl = ""
+        val url = URL(apiUrl)
+        val connection = url.openConnection() as HttpURLConnection
+        connection.requestMethod = "POST"
+        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+        connection.setRequestProperty("Accept", "application/json") 
+        connection.doOutput = true
+
+        // Prepare the data for the API request
+        val postData = "url=${URLEncoder.encode(originalUri, "UTF-8")}&alias=${URLEncoder.encode(customWord,
+                "UTF-8")}&qrBool=${URLEncoder.encode(isQr, "UTF-8")}"
+        val input = postData.toByteArray(Charsets.UTF_8)
+
+        // Send the data in the body of the request
+        connection.outputStream.use { it.write(input, 0, input.size) }
+
+        // Read the response code
+        val responseCode = connection.responseCode
+        println("Response Code: $responseCode")
+
+        // If the request was successful, get the short URL from the 'Location' header
+        if (responseCode == HttpURLConnection.HTTP_CREATED) {
+            newUrl = connection.getHeaderField("Location")
+            println("Response header: " + newUrl)
+
         }
+        //println("Full response: " + response)
+        //println("Shortened URL: " + newUrl)
+        return newUrl + ";" + qr
+    }
 
 
         private fun shortenRow(csvRow: String): String {
@@ -171,6 +213,7 @@
 
             return joinedString.toString()
         }
+
 
 
         private fun shortenUri(originalUri: String, customWord: String, isQr: String): String { // Modify it so it use ajax or it's gonna be a mess (use kotlin/js)

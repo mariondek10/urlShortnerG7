@@ -33,19 +33,19 @@ $(document).ready(
                     },
                     success: async function (data, request) {
                         console.log("APP.js data recibida:", data)
-                        url = data.url
+                        url = "http://localhost:8080" + data.url
+                        console.log("APP.js valor url conjunta:", url)
                         if(data.properties.qr){
-
                             $("#result").html(
                                 "<div class='alert alert-success lead'><a target='_blank' href='"
                                 + data.url
                                 + "'>"
-                                + data.url
+                                + url
                                 + "</a></div>"
                                 + "<div class='alert alert-success lead'><a target='_blank' href='"
                                 + data.properties.qr
                                 + "'>"
-                                + data.properties.qr
+                                + "http://localhost:8080" + data.properties.qr
                                 + "</a></div>"
                                 );
                         }else{
@@ -54,7 +54,7 @@ $(document).ready(
                                 "<div class='alert alert-success lead'><a target='_blank' href='"
                                 + data.url
                                 + "'>"
-                                + data.url
+                                + url
                                 + "</a></div>");
                         }
                         
@@ -67,6 +67,8 @@ $(document).ready(
                     }
                 });
             });
+
+        const socket = new WebSocket("ws://localhost:8080/my-websocket-endpoint");
 
         $("#ver_info").click(
             function(event) {
@@ -97,7 +99,6 @@ $(document).ready(
                     }
                 });
         });
-
 
         $("#result").on("click", "a", function() {
             $("#ver_info").prop('disabled', false);

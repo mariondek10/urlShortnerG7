@@ -1,3 +1,5 @@
+@file:Suppress("WildcardImport")
+
 package es.unizar.urlshortener.infrastructure.delivery
 
 import es.unizar.urlshortener.core.*
@@ -27,7 +29,8 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
     @ResponseBody
     @ExceptionHandler(value = [UrlRegisteredButNotReachable::class])
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    fun urlRegisteredButNotReachable(ex: UrlRegisteredButNotReachable) = ErrorMessage(HttpStatus.FORBIDDEN.value(), ex.message)
+    fun urlRegisteredButNotReachable(ex: UrlRegisteredButNotReachable) = ErrorMessage(HttpStatus.FORBIDDEN.value(),
+            ex.message)
 
     @ResponseBody
     @ExceptionHandler(value = [QRNotAvailable::class])

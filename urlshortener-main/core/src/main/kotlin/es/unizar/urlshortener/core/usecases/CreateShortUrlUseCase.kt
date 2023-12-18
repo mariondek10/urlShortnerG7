@@ -1,4 +1,4 @@
-@file:Suppress("WildcardImport")
+@file:Suppress("WildcardImport", "LongMethod", "CyclomaticComplexMethod", "NestedBlockDepth")
 
 package es.unizar.urlshortener.core.usecases
 
