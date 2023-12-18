@@ -89,7 +89,6 @@ data class ShortUrlDataOut(
  */
  data class CsvDataIn(
     val csv: String,
-    val selector: String
  )
 
 /**
@@ -191,17 +190,19 @@ class UrlShortenerControllerImpl(
     @PostMapping("/api/bulk", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE]) 
     override fun csvHandler(data: CsvDataIn, request: HttpServletRequest): ResponseEntity<CsvDataOut> =
         csvUseCase.convert(data.csv).let { processedData ->
+            
             val response = CsvDataOut(
                 csv = processedData
             )
+            System.out.println("(CsvHandler) response: CsvDataOut:" + response)
             when (processedData) {
-                "ok" -> {
+                "" -> {
                     ResponseEntity<CsvDataOut>(response, HttpStatus.OK)
                 }
-                "Invalid CSV: missing semicolons, the amount of semicolons must be 3 per line" -> {
+                "Invalid CSV: missing commas, the amount of commas must be 2 per line" -> {
                     ResponseEntity<CsvDataOut>(response, HttpStatus.BAD_REQUEST)
                 }
-                "Invalid CSV: too many semicolons in a line, should be 3 per line" -> {
+                "Invalid CSV: too many commas in a line, should be 2 per line" -> {
                     ResponseEntity<CsvDataOut>(response, HttpStatus.BAD_REQUEST)
                 }
                 else -> {

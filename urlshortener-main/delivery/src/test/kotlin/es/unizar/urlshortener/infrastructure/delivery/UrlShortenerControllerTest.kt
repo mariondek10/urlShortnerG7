@@ -368,6 +368,114 @@ class UrlShortenerControllerTest {
         assert(capturedPair == expectedPair) // Verificar si la captura coincide con los valores esperados
     }*/
 
+   
+    @Test
+    fun `csvHandler returns ok status when given an empty file`() {
+        val emptyString = ""
+        given(csvUseCase.convert(""))
+            .willReturn(emptyString)
+
+        mockMvc.perform(
+            post("/api/bulk")
+                .param("csv", emptyString)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+        )
+            .andDo(print())
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.csv").value(""))
+    }
+
+
+    @Test
+    fun `csvHandler returns 400 when recieved an invalid csv`() {
+        val csvData = "a34df"
+        given(csvUseCase.convert(csvData))
+            .willReturn(
+                "Invalid CSV: missing commas, the amount of commas must be 2 per line"
+            )
+
+        mockMvc.perform(
+            post("/api/bulk")
+                .param("csv", csvData)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+        )
+            .andDo(print())
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.csv").value(
+                "Invalid CSV: missing commas, the amount of commas must be 2 per line"
+            ))
+    }
+
+
+
+    @Test
+    fun `csvHandler returns a single line csv with the shortened urls, qr and custom words`() {
+        val csvData = "https://www.unizar.es/,universidad,true"
+        given(csvUseCase.convert(csvData))
+            .willReturn(
+                "https://www.unizar.es/,http://localhost:8080/universidad,http://localhost:8080/universidad/qr"
+            )
+
+        mockMvc.perform(
+            post("/api/bulk")
+                .param("csv", csvData)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+        )
+            .andDo(print())
+            .andExpect(status().isCreated)
+            .andExpect(jsonPath("$.csv").value(
+                "https://www.unizar.es/,http://localhost:8080/universidad,http://localhost:8080/universidad/qr"
+            ))
+    }
+
+    @Test
+    fun `csvHandler returns a single line csv with the shortened urls, no qr and no custom word`() {
+        val csvData = "https://www.unizar.es/,,false"
+        given(csvUseCase.convert(csvData))
+            .willReturn(
+                "https://www.unizar.es/,http://localhost:8080"
+            )
+
+        mockMvc.perform(
+            post("/api/bulk")
+                .param("csv", csvData)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+        )
+            .andDo(print())
+            .andExpect(status().isCreated)
+            .andExpect(jsonPath("$.csv").value(
+                "https://www.unizar.es/,http://localhost:8080"
+            ))
+    }
+
+    @Test
+    fun `csvHandler returns a csv with the shortened urls, and different custom word & qr options`() {
+        val csvData = "https://www.unizar.es/,,false\n" +
+                      "https://www.youtube.com/,videos,false\n" +
+                      "https://github.com/,trabajo,true"
+        given(csvUseCase.convert(csvData))
+            .willReturn(
+                "https://www.unizar.es/,http://localhost:8080,," +
+                "https://www.youtube.com/,http://localhost:8080/videos" +
+                "https://github.com/,http://localhost:8080/trabajo,http://localhost:8080/trabajo/qr"
+            )
+
+        mockMvc.perform(
+            post("/api/bulk")
+                .param("csv", csvData)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+        )
+            .andDo(print())
+            .andExpect(status().isCreated)
+            .andExpect(jsonPath("$.csv").value(
+                "https://www.unizar.es/,http://localhost:8080,," +
+                "https://www.youtube.com/,http://localhost:8080/videos" +
+                "https://github.com/,http://localhost:8080/trabajo,http://localhost:8080/trabajo/qr"
+            ))
+    }
+
+
+
 
 }
 
