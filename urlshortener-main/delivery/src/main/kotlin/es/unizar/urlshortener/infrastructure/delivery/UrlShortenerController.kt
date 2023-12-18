@@ -4,6 +4,7 @@ package es.unizar.urlshortener.infrastructure.delivery
 
 import es.unizar.urlshortener.core.ClickProperties
 import es.unizar.urlshortener.core.ShortUrlProperties
+//import es.unizar.urlshortener.core.blockingQueues.ReachabilityQueue
 import es.unizar.urlshortener.core.usecases.*
 import eu.bitwalker.useragentutils.UserAgent
 import jakarta.servlet.http.HttpServletRequest
@@ -23,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.net.URI
 import java.util.concurrent.BlockingQueue
 import kotlinx.coroutines.*
-
+import org.springframework.beans.factory.annotation.Qualifier
 
 
 /**
@@ -123,6 +124,7 @@ class UrlShortenerControllerImpl(
     val csvUseCase: CsvUseCase,
     val qrUseCase: QRUseCase,
     val qrQueue: BlockingQueue<Pair<String, String>>,
+    @Qualifier("reachabilityQueue") val reachableQueue: BlockingQueue<Pair<String,String>>,
     val identifyInfoClientUseCase: IdentifyInfoClientUseCase
 
 ) : UrlShortenerController {
@@ -173,32 +175,25 @@ class UrlShortenerControllerImpl(
                         System.out.println("(UrlShortenerController) datos APP.js: ShortUrlDataIn:" + data)
                         System.out.println("(UrlShortenerController) shortURL creada:" + it)
 
-                        val h = HttpHeaders()
-                        /* INTENTO DE USAR WebFluxLinkBuilder
+                        // Meter a la cola
+                        val value: String = if(it.properties.alias == ""){
+                            it.hash
+                        } else {
+                            it.properties.alias
+                        }
+                        reachableQueue.put(Pair(data.url, value))
 
-                        val url = WebFluxLinkBuilder.linkTo(
-                                WebFluxLinkBuilder.methodOn(UrlShortenerController::class.java).redirectTo(it.hash,
-                                    request)
-                        ).toUri()
-                        */
+                        val h = HttpHeaders()
                         val url = linkTo<UrlShortenerControllerImpl> { redirectTo(it.hash, request) }.toUri()
                         h.location = url
 
-                        //val properties = mutableMapOf<String, Any>("safe" to it.properties.safe)
+
                         val properties = mutableMapOf<String, Any>()
 
                         if(data.qrBool == true){
                             System.out.println("(UrlShortenerController) LLAMANDO A  generateQR")
                             qrQueue.put(Pair(it.hash, url.toString()))
                             System.out.println("(UrlShortenerController) LLAMANDO A getQR():" + url.toString())
-                            /* INTENTO DE USAR WebFluxLinkBuilder
-
-                            val qrUrl = WebFluxLinkBuilder.linkTo(
-                                WebFluxLinkBuilder.methodOn(UrlShortenerController::class.java).getQR(shortUrl.hash,
-                                    request)
-                            ).toUriComponentsBuilder()
-
-                            */
                             val qrUrl = linkTo<UrlShortenerControllerImpl> { getQR(it.hash, request) }.toUri()
                             properties["qr"] = qrUrl
                         }

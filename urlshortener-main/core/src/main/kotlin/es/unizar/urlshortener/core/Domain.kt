@@ -42,7 +42,8 @@ data class ShortUrlProperties(
     val owner: String? = null,
     val country: String? = null,
     val alias: String = "",
-    val qrBool: Boolean? = null
+    val qrBool: Boolean? = null,
+    val reachabilityStatus: Int = 2
 )
 
 /**
