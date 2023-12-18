@@ -91,6 +91,8 @@
     <div class="col-lg-12 text-center">
         <h1>Bulk url conversion</h1>
         <input type="file" id="csvFile" accept=".csv" class="center-block">
+        <label for="fastModeCheckbox">Fast-Mode</label>
+        <input type="checkbox" id="fastModeCheckbox">
         <button id="processButton">Process</button>
         <a id="downloadLink" style="display: none;" download="modified.csv">Download Modified CSV</a>
         <table id="output" style="display: none;"></table>
@@ -103,9 +105,12 @@
         petitionData = new FormData();
         var sel = 1;
         var variableValue = 1;
+        var fastModeStatus = false;
 
         processButton.addEventListener('click', () => {
 
+            fastModeStatus = fastModeCheckbox.checked;
+            const apiUrl = fastModeStatus ? "/api/fast-bulk" : "/api/bulk";
 
             const file = csvFileInput.files[0];
             if (file) { // Ensures there's an actual filed uploaded
@@ -122,7 +127,7 @@
 
                  $.ajax({
                     type: "POST",
-                    url: "/api/bulk",
+                    url: apiUrl,
                     data: dataCsv,
                     success: function (msg, status, request) {
                         csv = msg.csv;

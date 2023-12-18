@@ -13,6 +13,9 @@
     import java.nio.charset.StandardCharsets
     import java.net.URLEncoder
     import java.io.File
+    import java.util.concurrent.Callable
+    import java.util.concurrent.Executors
+    import java.util.concurrent.Future
 
 
     /**
@@ -21,6 +24,7 @@
      */
     interface CsvUseCase {
         fun convert(csvData: String): String
+        fun convertFast(csvData: String): String
     }
 
 
@@ -48,7 +52,7 @@
             val endlnCount = csvData.count { it == '\n' }
             if (endlnCount + 1 < semicolonCount / 2) { // Plus one becaus the last line may not have a \n
                 // Too many , per \n
-                return "Invalid CSV: too many commas in a line, should be 2 per line" 
+                return "Invalid CSV: too many commas in a line, should be 2 per line"
             }
 
             // We convert selector to int
@@ -59,30 +63,113 @@
                 if (row.isBlank()) {
                     ""
                 } else {
-                        val cells = row.split(",")
-                        val cell1 = cells.getOrNull(0) ?: ""
-                        val cell2 = cells.getOrNull(1) ?: ""
-                        val cell3 = cells.getOrNull(2) ?: ""
-                    
-                        try {      
-                            newCell = shortenUri(cell1,cell2,cell3)
-                            "$cell1,$newCell\n"
-                        } catch (e: MalformedURLException) {
-                            // Handle invalid URL
-                            println("Invalid URL: " + e)
-                            "invalid_url"
-                        } catch (e: Exception) {
-                            // Handle other errors
-                            println("Error: " + e)
-                            "conversion_error\n"
-                        }               
-                    
-                
+                    val cells = row.split(",")
+                    val cell1 = cells.getOrNull(0) ?: ""
+                    val cell2 = cells.getOrNull(1) ?: ""
+                    val cell3 = cells.getOrNull(2) ?: ""
+
+                    try {
+                        newCell = shortenUri(cell1,cell2,cell3)
+                        "$cell1,$newCell\n"
+                    } catch (e: MalformedURLException) {
+                        // Handle invalid URL
+                        println("Invalid URL: " + e)
+                        "invalid_url"
+                    } catch (e: Exception) {
+                        // Handle other errors
+                        println("Error: " + e)
+                        "conversion_error\n"
+                    }
+
+
                 }
 
             }
 
             return modifiedData
+        }
+        override fun convertFast(csvData: String): String {
+            // Case 1: empty csvData
+            if (csvData.isEmpty() || csvData.isBlank()) {
+                return ""
+            }
+
+            // Case 2: invaid csvData
+            // We check if csv has at least 2 , per \n
+            val semicolonCount = csvData.count { it == ',' }
+            if (semicolonCount % 2 != 0 || semicolonCount == 0) {
+                // Handle the case where the semicolon count is not a multiple of 2
+                return "Invalid CSV: missing commas, the amount of commas must be 2 per line"
+            }
+            // We check if csv has the correct number of \n per ,
+            val endlnCount = csvData.count { it == '\n' }
+            if (endlnCount + 1 < semicolonCount / 2) { // Plus one becaus the last line may not have a \n
+                // Too many , per \n
+                return "Invalid CSV: too many commas in a line, should be 2 per line" 
+            }
+
+            // Readies the executor
+            val executor = Executors.newFixedThreadPool(semicolonCount/2)
+
+            // Here's the different rows
+            val rows = csvData.split("\n")
+
+            // Preparing for future responses
+            val convertedUris = mutableListOf<Future<String>>()
+
+
+
+            // We use threads to process the rows rapidly
+            for (row in rows) {
+                val future: Future<String> = executor.submit(Callable {shortenRow(row)})
+                convertedUris.add(future)
+            }
+
+            val csvReturn = StringBuilder()
+            for (future in convertedUris) {
+                csvReturn.append(future.get()) // Blocking call to get the result
+            }
+
+            executor.shutdown()
+
+            return csvReturn.toString()
+        }
+
+
+        private fun shortenRow(csvRow: String): String {
+            println("Input: " + csvRow)
+            val joinedString = StringBuilder()
+            var rowString = csvRow.toString()
+
+            if (rowString.isBlank()) {
+                joinedString.append("")
+            } else {
+                println("Row: " + rowString)
+                val cells = rowString.split(",")
+                val cell1 = cells.getOrNull(0) ?: ""
+                val cell2 = cells.getOrNull(1) ?: ""
+                val cell3 = cells.getOrNull(2) ?: ""
+                println("Cell1: " + cell1)
+                println("Cell2: " + cell2)
+                println("Cell3: " + cell3)
+
+                try {
+                    val newCell = shortenUri(cell1, cell2, cell3)
+                    joinedString.append("$cell1,$newCell\n")
+                } catch (e: MalformedURLException) {
+                    // Handle invalid URL
+                    println("Invalid URL: $e")
+                    joinedString.append("invalid_url\n")
+                } catch (e: Exception) {
+                    // Handle other errors
+                    println("Error: $e")
+                    joinedString.append("conversion_error\n")
+                }
+
+
+            }
+
+            return joinedString.toString()
         }
 
 
