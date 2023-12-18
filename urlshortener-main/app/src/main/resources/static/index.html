@@ -97,7 +97,7 @@
                 console.log("Csv value: " + csv);
 
                  // Obtenemos los datos del formulario y los adicionales
-                 var dataCsv = $(this).serialize() + "&csv=" + encodeURIComponent(csv) + "&selector=" + encodeURIComponent(variableValue);
+                 var dataCsv = $(this).serialize() + "&csv=" + encodeURIComponent(csv);
                 console.log("Serialized data: " + dataCsv);
 
                  $.ajax({
