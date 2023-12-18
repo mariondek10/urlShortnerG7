@@ -4,14 +4,15 @@ package es.unizar.urlshortener.infrastructure.delivery
 
 import es.unizar.urlshortener.core.ClickProperties
 import es.unizar.urlshortener.core.ShortUrlProperties
-//import es.unizar.urlshortener.core.blockingQueues.ReachabilityQueue
 import es.unizar.urlshortener.core.usecases.*
 import eu.bitwalker.useragentutils.UserAgent
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.hateoas.server.mvc.linkTo
-import org.springframework.hateoas.server.reactive.WebFluxLinkBuilder
-import org.springframework.hateoas.server.core.LinkBuilderSupport
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -136,6 +137,19 @@ class UrlShortenerControllerImpl(
      * @return ResponseEntity containing the header information of all clicks to a given hash
      * Use the coroutines library to make the call to the use case asynchronous
      */
+    @Operation(
+            summary = "Redirect to URL identified by its id",
+            description = "Given an id, redirects if it's possible to the web associated",
+            responses = [
+                ApiResponse(
+                        responseCode = "200",
+                        description = "Redirección exitosa"),
+                ApiResponse(
+                        responseCode = "404",
+                        description = "ID doesn't exists",
+                        content = [Content()])
+            ]
+    )
     @GetMapping("/{id:(?!api|index).*}")
     override fun redirectTo(@PathVariable id: String, request: HttpServletRequest): ResponseEntity<Unit> =
         runBlocking{
@@ -158,6 +172,18 @@ class UrlShortenerControllerImpl(
     result.await()
     }
 
+    @Operation(
+            summary = "Creates a short Url",
+            description = "Creates a shortened URL based on provided long Url.",
+            responses = [ApiResponse(
+                            responseCode = "201",
+                            description = "Created",
+                            content =  [Content(
+                                mediaType = "application/json",
+                                schema = Schema(implementation = ShortUrlDataOut::class)
+                        )]
+            )]
+    )
     @PostMapping("/api/link", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
     override fun shortener(data: ShortUrlDataIn, request: HttpServletRequest): ResponseEntity<ShortUrlDataOut> =
             runBlocking {
@@ -272,6 +298,14 @@ class UrlShortenerControllerImpl(
             ResponseEntity<ByteArrayResource>(ByteArrayResource(qr, IMAGE_PNG_VALUE), h, HttpStatus.OK)
         }
 
+    @Operation(
+            summary = "Obtain click information for a short url"
+    )
+    @ApiResponse(
+        value = [
+            ApiResponse(responseCode = "200", description = "Información obtenida exitosamente")
+        ]
+    )
     @GetMapping("/api/link/{id}")
     override fun returnInfoHeader(@PathVariable id: String, request: HttpServletRequest): ResponseEntity<Any> {
         return ResponseEntity(identifyInfoClientUseCase.returnInfoShortUrl(id), HttpStatus.OK)

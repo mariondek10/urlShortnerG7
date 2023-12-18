@@ -172,9 +172,11 @@ class CsvUseCaseImpl(
     }
 
 
-    private fun shortenUri(originalUri: String, customWord: String, isQr: String): String {
-        // Modify it so it use ajax or it's gonna be a mess (use kotlin/js)
+    private fun shortenUri(originalUri: String, customWord: String, isQr: String): String { // Modify it so it use ajax or it's gonna be a mess (use kotlin/js)
         val apiUrl = "http://localhost:8080/api/link"
+        val prefix = "http://localhost:8080"
+
+        println("shortenUri(" + originalUri + customWord + isQr + ")")
 
         var newUrl = ""
         val url = URL(apiUrl)
@@ -185,8 +187,7 @@ class CsvUseCaseImpl(
         connection.doOutput = true
 
         // Prepare the data for the API request
-        val postData = "url=${URLEncoder.encode(originalUri, "UTF-8")}&alias=${URLEncoder.encode(customWord, 
-                "UTF-8")}&qrBool=${URLEncoder.encode(isQr, "UTF-8")}"
+        val postData = "url=${URLEncoder.encode(originalUri, "UTF-8")}&alias=${URLEncoder.encode(customWord, "UTF-8")}&qrBool=${URLEncoder.encode(isQr, "UTF-8")}"
         val input = postData.toByteArray(Charsets.UTF_8)
 
         // Send the data in the body of the request
@@ -205,6 +206,8 @@ class CsvUseCaseImpl(
         // Read the response from the server
         val response = connection.inputStream.bufferedReader().use { it.readText() }
 
+        println("Response: " + response)
+
         // Remove curly braces and split by comma
         val keyValuePairs = response
                 .replace("\",\"", ";")
@@ -216,19 +219,35 @@ class CsvUseCaseImpl(
                 .replace("\"","")
                 .split(";")
 
+        println("Post parsing response: " + keyValuePairs)
+        println("isQr = $isQr")
         var qr = ""
-        if (isQr == "true"){
+        if (isQr.trim().equals("true", ignoreCase = true)){
+            println("IM HERE")
+            /*
             // Extract and print key-value pairs
             keyValuePairs.forEach { pair ->
-                pair.trim().split(",")
+                val keyValue = pair.trim().split(",")
+                //println(keyValue)
+                if (true) {
+                    val key = keyValue[0].trim().removeSurrounding("\"")
+                    val value = keyValue[1].trim().removeSurrounding("\"")
+                    //qr = keyValue[2].trim().removeSurrounding("\"")
+                }
             }
 
             var splitkeys = keyValuePairs[1].split(",")
-            qr = "," + splitkeys.getOrNull(1)?.removeSuffix("}")
+
+
+            qr = "," + splitkeys.getOrNull(1)?.removeSuffix("}") ?: ""
+
+            */
+            qr = "," + prefix + newUrl + "/qr"
         }
 
         //println("Full response: " + response)
-        //println("Shortened URL: " + newUrl)
-        return newUrl + qr
+        println("Shortened URL: " + newUrl)
+        println("QR: " + qr)
+        return prefix + newUrl + qr
     }
 }

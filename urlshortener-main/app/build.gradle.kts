@@ -10,6 +10,7 @@ dependencies {
     implementation("org.webjars:bootstrap:${Version.BOOTSTRAP}")
     implementation("org.webjars:jquery:${Version.JQUERY}")
     implementation("org.springframework.boot:spring-boot-starter")
+    implementation("org.springdoc:springdoc_openapi-starter-webmvc-ui:2.2.0")
 
 
 
