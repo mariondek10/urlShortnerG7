@@ -53,10 +53,10 @@ class UrlShortenerControllerTest {
     private lateinit var qrUseCase: QRUseCase
 
     @MockBean
-    private lateinit var isReachableUseCase: IsReachableUseCase
+    private lateinit var qrQueue: BlockingQueue<Pair<String, String>>
 
     @MockBean
-    private lateinit var qrQueue: BlockingQueue<Pair<String, String>>
+    private lateinit var reachableQueue: BlockingQueue<Pair<String, String>>
 
     @MockBean
     private lateinit var identifyInfoClientUseCase: IdentifyInfoClientUseCase
