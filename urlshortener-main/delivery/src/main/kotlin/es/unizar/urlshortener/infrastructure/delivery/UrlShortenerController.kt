@@ -3,6 +3,7 @@
 package es.unizar.urlshortener.infrastructure.delivery
 
 import es.unizar.urlshortener.core.ClickProperties
+import es.unizar.urlshortener.core.InvalidUrlException
 import es.unizar.urlshortener.core.ShortUrlProperties
 import es.unizar.urlshortener.core.usecases.*
 import eu.bitwalker.useragentutils.UserAgent
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.hateoas.server.mvc.linkTo
@@ -143,11 +145,17 @@ class UrlShortenerControllerImpl(
             responses = [
                 ApiResponse(
                         responseCode = "200",
-                        description = "Redirección exitosa"),
+                        description = "Successful redirection"),
+                ApiResponse(
+                        responseCode = "400",
+                        description = "Bad Request"),
+                ApiResponse(
+                        responseCode = "403",
+                        description = "Forbidden"),
+
                 ApiResponse(
                         responseCode = "404",
-                        description = "ID doesn't exists",
-                        content = [Content()])
+                        description = "ID doesn't exists"),
             ]
     )
     @GetMapping("/{id:(?!api|index).*}")
@@ -175,14 +183,23 @@ class UrlShortenerControllerImpl(
     @Operation(
             summary = "Creates a short Url",
             description = "Creates a shortened URL based on provided long Url.",
-            responses = [ApiResponse(
-                            responseCode = "201",
-                            description = "Created",
-                            content =  [Content(
-                                mediaType = "application/json",
-                                schema = Schema(implementation = ShortUrlDataOut::class)
-                        )]
-            )]
+            responses = [
+                ApiResponse(
+                    responseCode = "201",
+                    description = "Created",
+                    content =  [Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = ShortUrlDataOut::class)
+                    )]),
+                ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request",
+                    content =  [Content(
+                        mediaType = "application/json",
+                        schema = Schema(implementation = InvalidUrlException::class)
+                    )]),
+
+            ]
     )
     @PostMapping("/api/link", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
     override fun shortener(data: ShortUrlDataIn, request: HttpServletRequest): ResponseEntity<ShortUrlDataOut> =
@@ -238,6 +255,36 @@ class UrlShortenerControllerImpl(
     }
 
 
+
+    @Operation(
+        summary = "Handle CSV data in bulk",
+        description = "Processes CSV data in bulk and provides processing status." ,
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Ok",
+                content =  [Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = CsvDataOut::class)
+                )]
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Bad Request",
+                content =  [Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = CsvDataOut::class)
+                )]
+            ),
+            ApiResponse(
+                responseCode = "201",
+                description = "Created",
+                content =  [Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = CsvDataOut::class)
+                )]
+            )]
+    )
     @PostMapping("/api/bulk", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE]) 
     override fun csvHandler(data: CsvDataIn, request: HttpServletRequest): ResponseEntity<CsvDataOut> =
         csvUseCase.convert(data.csv).let { processedData ->
@@ -262,6 +309,36 @@ class UrlShortenerControllerImpl(
             }            
         }
 
+
+    @Operation(
+        summary = "Handle CSV data in bulk handled asinchronously",
+        description = "Processes CSV data in bulk and provides processing status." ,
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Ok",
+                content =  [Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = CsvDataOut::class)
+                )]
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Bad Request",
+                content =  [Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = CsvDataOut::class)
+                )]
+            ),
+            ApiResponse(
+                responseCode = "201",
+                description = "Created",
+                content =  [Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = CsvDataOut::class)
+                )]
+            )]
+    )
     @PostMapping("/api/fast-bulk", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
     override fun csvHandlerFast(data: CsvDataIn, request: HttpServletRequest): ResponseEntity<CsvDataOut> =
             csvUseCase.convertFast(data.csv).let { processedData ->
@@ -288,8 +365,29 @@ class UrlShortenerControllerImpl(
 
 
 
-
-    @GetMapping("/{id:(?!api|index).*}/qr")
+    @Operation(
+        summary = "Obtain a QR",
+        description = "Given an id, returns a QR Code in PNG format",
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "Returns the QR code",
+                content = [Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ByteArrayResource::class)
+                )]
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "Bad Request"
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "Not found"
+            )
+        ]
+    )
+        @GetMapping("/{id:(?!api|index).*}/qr")
     override fun getQR(@PathVariable id: String, request: HttpServletRequest): ResponseEntity<ByteArrayResource> =
         qrUseCase.getQRUseCase(id).let { qr ->
             val h = HttpHeaders()
@@ -302,9 +400,12 @@ class UrlShortenerControllerImpl(
             summary = "Obtain click information for a short url"
     )
     @ApiResponse(
-        value = [
-            ApiResponse(responseCode = "200", description = "Información obtenida exitosamente")
-        ]
+        responseCode = "200",
+        description = "Information succesfully obtained",
+        content = [Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = Map::class, subTypes = [String::class, Int::class])
+        )]
     )
     @GetMapping("/api/link/{id}")
     override fun returnInfoHeader(@PathVariable id: String, request: HttpServletRequest): ResponseEntity<Any> {
