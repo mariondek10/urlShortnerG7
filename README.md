@@ -11,3 +11,7 @@ https://www.youtube.com/,videos,false
 https://github.com/,,true
 https://elpais.com/,,false
 ```
+
+### IMPORTANT:
+
+When shorting a URI, it cannot be repeated on the same URI if it was already attempted with a qr or a custom word
