@@ -23,7 +23,6 @@ open class QRBlockingQueue(
     open
     fun executor() {
         if (qrQueue.isNotEmpty()) {
-            System.out.println("(QRBlockingQueue) Executorrrr")
             val result = qrQueue.take()
             qrUseCase.generateQR(result.first, result.second)
         }

@@ -72,7 +72,6 @@ class CsvUseCaseImpl(
                     "$cell1,$newCell\n"
                 } catch (e: MalformedURLException) {
                     // Handle invalid URL
-                    println("Invalid URL: " + e)
                     "invalid_url"
                 } catch (e: Exception) {
                     // Handle other errors
@@ -136,21 +135,16 @@ class CsvUseCaseImpl(
 
 
     private fun shortenRow(csvRow: String): String {
-        println("Input: " + csvRow)
         val joinedString = StringBuilder()
         var rowString = csvRow.toString()
 
         if (rowString.isBlank()) {
             joinedString.append("")
         } else {
-            println("Row: " + rowString)
             val cells = rowString.split(",")
             val cell1 = cells.getOrNull(0) ?: ""
             val cell2 = cells.getOrNull(1) ?: ""
             val cell3 = cells.getOrNull(2) ?: ""
-            println("Cell1: " + cell1)
-            println("Cell2: " + cell2)
-            println("Cell3: " + cell3)
 
             try {
                 val newCell = shortenUri(cell1, cell2, cell3)
@@ -161,7 +155,6 @@ class CsvUseCaseImpl(
                 joinedString.append("invalid_url\n")
             } catch (e: Exception) {
                 // Handle other errors
-                println("Error: $e")
                 joinedString.append("conversion_error\n")
             }
 
@@ -176,7 +169,6 @@ class CsvUseCaseImpl(
         val apiUrl = "http://localhost:8080/api/link"
         val prefix = "http://localhost:8080"
 
-        println("shortenUri(" + originalUri + customWord + isQr + ")")
 
         var newUrl = ""
         val url = URL(apiUrl)
@@ -195,18 +187,15 @@ class CsvUseCaseImpl(
 
         // Read the response code
         val responseCode = connection.responseCode
-        println("Response Code: $responseCode")
 
         // If the request was successful, get the short URL from the 'Location' header
         if (responseCode == HttpURLConnection.HTTP_CREATED) {
             newUrl = connection.getHeaderField("Location")
-            println("Response header: " + newUrl)
         }
 
         // Read the response from the server
         val response = connection.inputStream.bufferedReader().use { it.readText() }
 
-        println("Response: " + response)
 
         // Remove curly braces and split by comma
         val keyValuePairs = response
@@ -219,11 +208,8 @@ class CsvUseCaseImpl(
                 .replace("\"","")
                 .split(";")
 
-        println("Post parsing response: " + keyValuePairs)
-        println("isQr = $isQr")
         var qr = ""
         if (isQr.trim().equals("true", ignoreCase = true)){
-            println("IM HERE")
             /*
             // Extract and print key-value pairs
             keyValuePairs.forEach { pair ->
@@ -246,8 +232,6 @@ class CsvUseCaseImpl(
         }
 
         //println("Full response: " + response)
-        println("Shortened URL: " + newUrl)
-        println("QR: " + qr)
         return prefix + newUrl + qr
     }
 }

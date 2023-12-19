@@ -180,6 +180,13 @@ class UrlShortenerControllerImpl(
     result.await()
     }
 
+    /**
+     * Creates a short Url.
+     * @param data The ShortUrlDataIn required to create a short url.
+     * @param request The HttpServletRequest containing the header information
+     * @return ResponseEntity containing ShortUrlDataOut for the html
+     * Use the coroutines library to make the call to the use case asynchronous
+     */
     @Operation(
             summary = "Creates a short Url",
             description = "Creates a shortened URL based on provided long Url.",
@@ -215,9 +222,6 @@ class UrlShortenerControllerImpl(
                             qrBool = data.qrBool
                         )
                     ).let {
-                        System.out.println("(UrlShortenerController) datos APP.js: ShortUrlDataIn:" + data)
-                        System.out.println("(UrlShortenerController) shortURL creada:" + it)
-
                         // Meter a la cola
                         val value: String = if(it.properties.alias == ""){
                             it.hash
@@ -234,9 +238,8 @@ class UrlShortenerControllerImpl(
                         val properties = mutableMapOf<String, Any>()
 
                         if(data.qrBool == true){
-                            System.out.println("(UrlShortenerController) LLAMANDO A  generateQR")
+                            // Meter a la cola
                             qrQueue.put(Pair(it.hash, url.toString()))
-                            System.out.println("(UrlShortenerController) LLAMANDO A getQR():" + url.toString())
                             val qrUrl = linkTo<UrlShortenerControllerImpl> { getQR(it.hash, request) }.toUri()
                             properties["qr"] = qrUrl
                         }
@@ -245,7 +248,6 @@ class UrlShortenerControllerImpl(
                             url = url,
                             properties = properties
                         )
-                        System.out.println("(UrlShortenerController) response: ShortUrlDataOut:" + response)
 
                         ResponseEntity<ShortUrlDataOut>(response, h, HttpStatus.CREATED)
                     }
@@ -292,7 +294,6 @@ class UrlShortenerControllerImpl(
             val response = CsvDataOut(
                 csv = processedData
             )
-            System.out.println("(CsvHandler) response: CsvDataOut:" + response)
             when (processedData) {
                 "" -> {
                     ResponseEntity<CsvDataOut>(response, HttpStatus.OK)
@@ -346,7 +347,6 @@ class UrlShortenerControllerImpl(
                 val response = CsvDataOut(
                         csv = processedData
                 )
-                System.out.println("(CsvHandler) response: CsvDataOut:" + response)
                 when (processedData) {
                     "" -> {
                         ResponseEntity<CsvDataOut>(response, HttpStatus.OK)
@@ -364,7 +364,12 @@ class UrlShortenerControllerImpl(
             }
 
 
-
+    /**
+     * Creates a short Url.
+     * @param id The ID representing the hash of the URI
+     * @param request The HttpServletRequest containing the header information
+     * @return ResponseEntity containing ByteArrayResource of the QR
+     */
     @Operation(
         summary = "Obtain a QR",
         description = "Given an id, returns a QR Code in PNG format",
@@ -392,10 +397,15 @@ class UrlShortenerControllerImpl(
         qrUseCase.getQRUseCase(id).let { qr ->
             val h = HttpHeaders()
             h.set(HttpHeaders.CONTENT_TYPE, IMAGE_PNG_VALUE)
-            System.out.println("(UrlShortenerController) qr del getQRUseCase:" + qr)
             ResponseEntity<ByteArrayResource>(ByteArrayResource(qr, IMAGE_PNG_VALUE), h, HttpStatus.OK)
         }
 
+    /**
+     * Creates a short Url.
+     * @param id The ID representing the hash of the URI
+     * @param request The HttpServletRequest containing the header information
+     * @return ResponseEntity
+     */
     @Operation(
             summary = "Obtain click information for a short url"
     )

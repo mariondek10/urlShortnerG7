@@ -22,9 +22,7 @@ open class ReachabilityQueue(
     open
     fun executor() {
         if (reachableQueue.isNotEmpty()) {
-            println("(Cola alcanzabilidad) Executorrrr")
             val result = reachableQueue.take()
-            println(result)
             isReachableUseCase.isReachable(result.first, result.second)
         }
     }

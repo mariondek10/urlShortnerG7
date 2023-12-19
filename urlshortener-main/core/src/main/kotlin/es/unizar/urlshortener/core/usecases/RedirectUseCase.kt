@@ -32,7 +32,6 @@ class RedirectUseCaseImpl(
        val shortUrl = shortUrlRepository.findByKey(key)
         if (shortUrl != null){
             val code = shortUrlRepository.findReachabilityCodeByKey(key)
-            println("Codigo de alcanzabilidad redirectUseCase" + code)
             when (code) {
                 0 -> throw UrlRegisteredButNotReachable(key)
                 2 -> throw ReachabilityNotChecked(key)
