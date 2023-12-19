@@ -11,7 +11,7 @@ import es.unizar.urlshortener.core.*
  * **Note**: This is an example of functionality.
  */
 interface CreateShortUrlUseCase {
-    fun     create(url: String, data: ShortUrlProperties): ShortUrl
+    fun  create(url: String, data: ShortUrlProperties): ShortUrl
 }
 
 /**
