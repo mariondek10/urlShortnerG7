@@ -133,7 +133,7 @@ class CsvUseCaseImpl(
         return csvReturn.toString()
     }
 
-
+    @Suppress("SwallowedException")
     private fun shortenRow(csvRow: String): String {
         val joinedString = StringBuilder()
         var rowString = csvRow.toString()
@@ -165,7 +165,8 @@ class CsvUseCaseImpl(
     }
 
 
-    private fun shortenUri(originalUri: String, customWord: String, isQr: String): String { // Modify it so it use ajax or it's gonna be a mess (use kotlin/js)
+    private fun shortenUri(originalUri: String, customWord: String, isQr: String): String {
+        // Modify it so it use ajax or it's gonna be a mess (use kotlin/js)
         val apiUrl = "http://localhost:8080/api/link"
         val prefix = "http://localhost:8080"
 
@@ -179,7 +180,8 @@ class CsvUseCaseImpl(
         connection.doOutput = true
 
         // Prepare the data for the API request
-        val postData = "url=${URLEncoder.encode(originalUri, "UTF-8")}&alias=${URLEncoder.encode(customWord, "UTF-8")}&qrBool=${URLEncoder.encode(isQr, "UTF-8")}"
+        val postData = "url=${URLEncoder.encode(originalUri, "UTF-8")}&alias=${URLEncoder.encode(customWord, 
+                "UTF-8")}&qrBool=${URLEncoder.encode(isQr, "UTF-8")}"
         val input = postData.toByteArray(Charsets.UTF_8)
 
         // Send the data in the body of the request
@@ -198,15 +200,15 @@ class CsvUseCaseImpl(
 
 
         // Remove curly braces and split by comma
-        val keyValuePairs = response
-                .replace("\",\"", ";")
-                .replace("{\"", "")
-                .replace("\"}", "")
-                .replace("\":\"", ",")
-                .replace("\":{", ",")
-                .replace("}}","")
-                .replace("\"","")
-                .split(";")
+        response
+            .replace("\",\"", ";")
+            .replace("{\"", "")
+            .replace("\"}", "")
+            .replace("\":\"", ",")
+            .replace("\":{", ",")
+            .replace("}}","")
+            .replace("\"","")
+            .split(";")
 
         var qr = ""
         if (isQr.trim().equals("true", ignoreCase = true)){
