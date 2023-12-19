@@ -35,6 +35,13 @@ class CsvUseCaseImpl(
         // We need a numeric parameter to work as a selector
         //private val temp: Int
 ) : CsvUseCase {
+
+    /**
+     * @brief Shorten all the URIs in a csv file
+     * @param csvData The string representing the csv file
+     * @param url The shortened URL's String
+     * @return All the shortened URIs in a string representing a csv file
+     */
     override fun convert(csvData: String): String {
         // Case 1: empty csvData
         if (csvData.isEmpty() || csvData.isBlank()) {
@@ -86,6 +93,13 @@ class CsvUseCaseImpl(
 
         return modifiedData
     }
+
+    /**
+     * @brief Shorten all the URIs in a csv file in a faster manner
+     * @param csvData The string representing the csv file
+     * @param url The shortened URL's String
+     * @return All the shortened URIs in a string representing a csv file
+     */
     override fun convertFast(csvData: String): String {
         // Case 1: empty csvData
         if (csvData.isEmpty() || csvData.isBlank()) {
@@ -164,7 +178,13 @@ class CsvUseCaseImpl(
         return joinedString.toString()
     }
 
-
+    /**
+     * @brief Shortens a URI
+     * @param originalUri The URI to be shortened
+     * @param customWord The custom word to be used (can be blank)
+     * @param isQR Wether a qr link should be created
+     * @return The shortened URI and the link to the qr if isQR states so
+     */
     private fun shortenUri(originalUri: String, customWord: String, isQr: String): String {
         // Modify it so it use ajax or it's gonna be a mess (use kotlin/js)
         val apiUrl = "http://localhost:8080/api/link"
